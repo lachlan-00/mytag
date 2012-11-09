@@ -66,9 +66,13 @@ class mytag(object):
         self.builder = Gtk.Builder()
         self.builder.add_from_file("main.ui")
         self.builder.connect_signals(self)
-        self.currentfolder = os.path.dirname(os.getenv('HOME'))
+        self.current_dir = os.getenv('HOME')
+        self.new_dir = None
         self.folderlist = self.builder.get_object('folderstore')
         self.foldertree = self.builder.get_object('folderview')
+        self.contentlist = self.builder.get_object('filestore')
+        self.contenttree = self.builder.get_object('fileview')
+        #self.choosefolder = self.builder.get_object('librarychooser')
         self.worker = None
         if not self.worker:
             self.worker = WorkerThread(self)
@@ -79,8 +83,21 @@ class mytag(object):
         self.Window.set_title("mytag: Python tag editor")
         self.Window.connect("destroy", self.quit)
         self.editbutton = self.builder.get_object("editbutton")
-        self.editbutton.connect("clicked", self.workermethods)
-        self.listfolder(self.currentfolder)
+        self.editbutton.connect("clicked", self.loadselection)
+        self.backbutton = self.builder.get_object("backbutton")
+        self.backbutton.connect("clicked", self.goback)
+        self.homebutton = self.builder.get_object("homebutton")
+        self.homebutton.connect("clicked", self.gohome)
+        self.folderview = self.builder.get_object("folderview")
+        self.folderview.connect("row-activated", self.folderclick)
+        self.listfolder(self.current_dir)
+        self.foldertree.set_model(self.folderlist)
+        cell = Gtk.CellRendererText()
+        foldercolumn = Gtk.TreeViewColumn("Select Folder:", cell, text=0)
+        self.foldertree.append_column(foldercolumn)
+        self.foldertree.set_model(self.folderlist)
+        filecolumn = Gtk.TreeViewColumn("Select Files", cell, text=0)
+        self.contenttree.append_column(filecolumn)
         self.Window.show()
         Gtk.main()
         #
@@ -101,20 +118,71 @@ class mytag(object):
                 self.worker.run(self.test2())
         return True
 
+    def loadselection(self, *args):
+        print dir(self.contenttree.get_selection())
+        model, fileiter = self.contenttree.get_selection().get_selected()
+        if fileiter:
+            print model[treeiter][0]
+            #self.new_files = self.current_dir + '/' + model[treeiter][0]
+        #if os.path.isdir(self.new_dir):
+        #    self.listfolder(self.new_dir)
+        return
+
+    def folderclick(self, *args):
+        model, treeiter = self.foldertree.get_selection().get_selected()
+        if treeiter:
+            self.new_dir = self.current_dir + '/' + model[treeiter][0]
+        if os.path.isdir(self.new_dir):
+            self.listfolder(self.new_dir)
+        return
+
+
+    def gohome(self, *args):
+        print 'gohome'
+        self.listfolder(os.getenv('HOME'))
+
+    def goback(self, *args):
+        back_dir = os.path.dirname(self.current_dir)
+        #print dir(self.choosefolder)
+        self.listfolder(back_dir)
+
+
     def listfolder(self, *args):
-        in_dir = args[0]
+        self.current_dir = args[0]
+        if not type(args[0]) == type(''):
+            print args[0].get_current_folder()
+            self.current_dir = args[0].get_current_folder()
+        self.filelist = os.listdir(self.current_dir)
+        self.filelist.sort()
         # clear list if we have scanned before
-        self.folderlist.clear()
-        # search the supplied directory for items
-        for items in os.listdir(in_dir):
-            self.folderlist.append(items])
+        for items in self.folderlist:
+            self.folderlist.remove(items.iter)
         # clear combobox before adding entries
-        self.foldertree.clear()
-        self.foldertree.set_model(self.folderlist)
-        cell = Gtk.CellRendererText()
-        self.foldertree.pack_start(cell, False)
-        self.foldertree.add_attribute(cell,'text',0)
-        #self.foldertree.set_active(0)
+        for items in self.foldertree:
+            self.foldertree.remove(items.iter)
+        # search the supplied directory for items
+        for items in self.filelist:
+            test_dir = os.path.isdir(self.current_dir + '/'+ items)
+            if not items[0] == '.' and test_dir:
+                self.folderlist.append([items])
+        self.listfiles()
+        return
+
+    def listfiles(self, *args):
+        print self.current_dir
+        files_dir = os.listdir(self.current_dir)
+        files_dir.sort()
+        # clear list if we have scanned before
+        for items in self.contentlist:
+            self.contentlist.remove(items.iter)
+        # clear combobox before adding entries
+        for items in self.contenttree:
+            self.contenttree.remove(items.iter)
+        # search the supplied directory for items
+        for items in files_dir:
+            test_file = os.path.isfile(self.current_dir + '/'+ items)
+            if not items[0] == '.' and test_file:
+                self.contentlist.append([items])
         return
 
     def test2(self, *args):
