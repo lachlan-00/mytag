@@ -66,7 +66,9 @@ class mytag(object):
         self.builder = Gtk.Builder()
         self.builder.add_from_file("main.ui")
         self.builder.connect_signals(self)
-        sourcefolder = os.path.dirname(os.getenv('HOME'))
+        self.currentfolder = os.path.dirname(os.getenv('HOME'))
+        self.folderlist = self.builder.get_object('folderstore')
+        self.foldertree = self.builder.get_object('folderview')
         self.worker = None
         if not self.worker:
             self.worker = WorkerThread(self)
@@ -78,8 +80,7 @@ class mytag(object):
         self.Window.connect("destroy", self.quit)
         self.editbutton = self.builder.get_object("editbutton")
         self.editbutton.connect("clicked", self.workermethods)
-        #self.folderbutton = self.builder.get_object("folderbutton")
-        #self.folderbutton.connect("clicked", self.workermethods)
+        self.listfolder(self.currentfolder)
         self.Window.show()
         Gtk.main()
         #
@@ -100,12 +101,21 @@ class mytag(object):
                 self.worker.run(self.test2())
         return True
 
-    def test(self, *args):
-        print 'TESTED'
-        print 'TESTED'
-        print 'TESTED'
-        print 'TESTED'
-        return True
+    def listfolder(self, *args):
+        in_dir = args[0]
+        # clear list if we have scanned before
+        self.folderlist.clear()
+        # search the supplied directory for items
+        for items in os.listdir(in_dir):
+            self.folderlist.append(items])
+        # clear combobox before adding entries
+        self.foldertree.clear()
+        self.foldertree.set_model(self.folderlist)
+        cell = Gtk.CellRendererText()
+        self.foldertree.pack_start(cell, False)
+        self.foldertree.add_attribute(cell,'text',0)
+        #self.foldertree.set_active(0)
+        return
 
     def test2(self, *args):
         count = 0
