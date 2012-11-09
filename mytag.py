@@ -23,7 +23,7 @@
 """
 
 #import shutil
-#import os
+import os
 #import subprocess
 #import random
 #import mimetypes
@@ -66,6 +66,7 @@ class mytag(object):
         self.builder = Gtk.Builder()
         self.builder.add_from_file("main.ui")
         self.builder.connect_signals(self)
+        sourcefolder = os.path.dirname(os.getenv('HOME'))
         self.worker = None
         if not self.worker:
             self.worker = WorkerThread(self)
@@ -77,8 +78,8 @@ class mytag(object):
         self.Window.connect("destroy", self.quit)
         self.editbutton = self.builder.get_object("editbutton")
         self.editbutton.connect("clicked", self.workermethods)
-        self.folderbutton = self.builder.get_object("folderbutton")
-        self.folderbutton.connect("clicked", self.workermethods)
+        #self.folderbutton = self.builder.get_object("folderbutton")
+        #self.folderbutton.connect("clicked", self.workermethods)
         self.Window.show()
         Gtk.main()
         #
