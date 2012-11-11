@@ -119,13 +119,22 @@ class mytag(object):
         return True
 
     def loadselection(self, *args):
-        print dir(self.contenttree.get_selection())
-        model, fileiter = self.contenttree.get_selection().get_selected()
-        if fileiter:
-            print model[treeiter][0]
-            #self.new_files = self.current_dir + '/' + model[treeiter][0]
-        #if os.path.isdir(self.new_dir):
-        #    self.listfolder(self.new_dir)
+        self.new_files = None
+        model, fileiter = self.contenttree.get_selection().get_selected_rows() #.get_selected()
+        refs = []
+        for files in fileiter:
+            refs.append(Gtk.TreeRowReference.new(model, files))
+            print files
+        print refs
+        #if fileiter:
+        #    print model[fileiter][0]
+        #    self.new_files = self.current_dir + '/' + model[fileiter][0]
+        #print self.new_files
+        #print dir(self.contenttree.get_selected_rows())
+        #print self.contenttree.get_selected_rows().get_selected()
+        #print self.contenttree.get_selected_rows().get_selected()
+        #if os.path.isfile(self.new_files):
+        #    self.listfolder(self.new_files)
         return
 
     def folderclick(self, *args):
@@ -138,16 +147,19 @@ class mytag(object):
 
 
     def gohome(self, *args):
-        print 'gohome'
+        """ go to the defined hom folder """
+        ### CONF OPTIONS TO BE ADDED TO CHANGE HOME
         self.listfolder(os.getenv('HOME'))
 
     def goback(self, *args):
+        """ go back the the previous directory """
         back_dir = os.path.dirname(self.current_dir)
         #print dir(self.choosefolder)
         self.listfolder(back_dir)
 
 
     def listfolder(self, *args):
+        """ function to list the folder column """
         self.current_dir = args[0]
         if not type(args[0]) == type(''):
             print args[0].get_current_folder()
@@ -169,6 +181,7 @@ class mytag(object):
         return
 
     def listfiles(self, *args):
+        """ function to fill the file list column """
         print self.current_dir
         files_dir = os.listdir(self.current_dir)
         files_dir.sort()
