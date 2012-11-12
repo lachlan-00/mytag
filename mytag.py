@@ -72,13 +72,13 @@ class mytag(object):
         self.foldertree = self.builder.get_object('folderview')
         self.contentlist = self.builder.get_object('filestore')
         self.contenttree = self.builder.get_object('fileview')
-        #self.choosefolder = self.builder.get_object('librarychooser')
         self.worker = None
         if not self.worker:
             self.worker = WorkerThread(self)
         self.run()
 
     def run(self, *args):
+        """ create main window and connect functions """
         self.Window = self.builder.get_object("main_window")
         self.Window.set_title("mytag: Python tag editor")
         self.Window.connect("destroy", self.quit)
@@ -88,43 +88,50 @@ class mytag(object):
         self.backbutton.connect("clicked", self.goback)
         self.homebutton = self.builder.get_object("homebutton")
         self.homebutton.connect("clicked", self.gohome)
+        # prepare folder and file views
+        ## required? cell = Gtk.CellRendererText() ## required?
+        ## required? foldercolumn = Gtk.TreeViewColumn("Select Folder:", cell, text=0) ## required?
+        ## required? filecolumn = Gtk.TreeViewColumn("Select Files", cell, text=0) ## required?
+
         self.folderview = self.builder.get_object("folderview")
         self.folderview.connect("row-activated", self.folderclick)
         self.listfolder(self.current_dir)
-        self.foldertree.set_model(self.folderlist)
-        cell = Gtk.CellRendererText()
-        foldercolumn = Gtk.TreeViewColumn("Select Folder:", cell, text=0)
-        self.foldertree.append_column(foldercolumn)
-        self.foldertree.set_model(self.folderlist)
-        filecolumn = Gtk.TreeViewColumn("Select Files", cell, text=0)
-        self.contenttree.append_column(filecolumn)
+        ## required? self.foldertree.set_model(self.folderlist)
+        ## required? self.foldertree.append_column(foldercolumn)
+        ## required? self.foldertree.set_model(self.folderlist)
+
+        self.fileview = self.builder.get_object("fileview")
+        self.fileview.connect("row-activated", self.loadselection)
+        
+        ## required? self.contenttree.append_column(filecolumn)
+        ## required? self.contenttree.set_model(self.filelist)
         self.Window.show()
         Gtk.main()
-        #
-        #self.worker.run(self.test2())
 
     def quit(self, *args):
-        # Permanently stop the process thread
+        """ stop the process thread and close the program"""
         self.worker._Thread__stop()
         self.Window.destroy()
         Gtk.main_quit(*args)
         return False
 
-    def workermethods(self, *args):
-        for items in args:
-            if items.get_tooltip_text() == 'Reload the folder list':
-                self.worker.run(self.test())
-            if items.get_tooltip_text() == 'Edit the selected files':
-                self.worker.run(self.test2())
-        return True
+    #def workermethods(self, *args):
+    #    for items in args:
+    #        if items.get_tooltip_text() == 'Reload the folder list':
+    #            self.worker.run(self.test())
+    #        if items.get_tooltip_text() == 'Edit the selected files':
+    #            self.worker.run(self.test2())
+    #    return True
 
     def loadselection(self, *args):
+        """ load files into tag editor """
         self.new_files = None
         model, fileiter = self.contenttree.get_selection().get_selected_rows() #.get_selected()
         refs = []
         for files in fileiter:
             refs.append(Gtk.TreeRowReference.new(model, files))
             print files
+            self.contenttree.get_selection(model, files)
         print refs
         #if fileiter:
         #    print model[fileiter][0]
@@ -138,6 +145,7 @@ class mytag(object):
         return
 
     def folderclick(self, *args):
+        """ traverse folders on double click """
         model, treeiter = self.foldertree.get_selection().get_selected()
         if treeiter:
             self.new_dir = self.current_dir + '/' + model[treeiter][0]
@@ -147,14 +155,13 @@ class mytag(object):
 
 
     def gohome(self, *args):
-        """ go to the defined hom folder """
+        """ go to the defined home folder """
         ### CONF OPTIONS TO BE ADDED TO CHANGE HOME
         self.listfolder(os.getenv('HOME'))
 
     def goback(self, *args):
         """ go back the the previous directory """
         back_dir = os.path.dirname(self.current_dir)
-        #print dir(self.choosefolder)
         self.listfolder(back_dir)
 
 
@@ -198,12 +205,6 @@ class mytag(object):
                 self.contentlist.append([items])
         return
 
-    def test2(self, *args):
-        count = 0
-        while count < 1000:
-            print 'secondmethodrunning'
-            count = count + 1
-        return True
 
 if __name__ == "__main__":
     Gdk.threads_init()
