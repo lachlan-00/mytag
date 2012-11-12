@@ -1,5 +1,25 @@
-Starting a python tag editor.
+mytag: Python tag editor
 
-tagtool sucks so i'm making a replacement.
+Why:
+tagtool sucks so I'm making a GTK3 ID3v2.4 compatible replacement.
 
-not complete in any way, just creating the interface.
+About:
+This is a program to bring all the requirements of managing music files together into one program. I have written a lot of music and file organisation programs for myself and the major software in this area just doesn't fit my needs.
+
+News:
+-The interface is basically feature complete now. (finally!)
+-I will be integrating my work with:
+   * pOrganiser for organising your music library per folder.
+        (Currently unreleased...)
+   * possibly pySyncP3[1] as well.
+-Probably add set tags from filename feature as well.
+
+These extra features highlight how much tagging programs are missing when you are editing.
+Just because you're editing tags doesn't mean that your files are corect either!
+
+Requires:
+python 2.7 and python-mutagen to be installed.
+
+
+Links:
+[1] https://github.com/lachlan-00/pySyncP3
