@@ -29,11 +29,22 @@ import os
 #import mimetypes
 import threading
 
+try:
+    import mutagen
+    TAG_SUPPORT = True
+except ImportError:
+    TAG_SUPPORT = True
+    print 'Please install python-mutagen'
+
 from multiprocessing import Process
 from threading import Thread
 
 from gi.repository import Gtk
 from gi.repository import Gdk
+
+MEDIA_TYPES = ['.m4a', '.flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
+YR_SPLIT = ['-', '/', '\\']
+
 
 class WorkerThread(Thread):
     """Worker Thread Class."""
@@ -63,6 +74,8 @@ class mytag(object):
 
 
     def __init__(self):
+        if not TAG_SUPPORT:
+            return False
         self.builder = Gtk.Builder()
         self.builder.add_from_file("main.ui")
         self.builder.connect_signals(self)
@@ -75,12 +88,16 @@ class mytag(object):
 
     def connectui(self, *args):
         """ connect all the window wisgets """
+        self.settingsbutton = self.builder.get_object("settingsbutton")
+        self.settingsbutton.connect("clicked", self.showconfig)
         self.editbutton = self.builder.get_object("editbutton")
         self.editbutton.connect("clicked", self.loadselection)
         self.backbutton = self.builder.get_object("backbutton")
         self.backbutton.connect("clicked", self.goback)
         self.homebutton = self.builder.get_object("homebutton")
         self.homebutton.connect("clicked", self.gohome)
+        self.homebutton = self.builder.get_object("gobutton")
+        self.homebutton.connect("clicked", self.savetags)
         self.folderlist = self.builder.get_object('folderstore')
         self.foldertree = self.builder.get_object('folderview')
         self.contentlist = self.builder.get_object('filestore')
@@ -103,13 +120,17 @@ class mytag(object):
         self.discentry = self.builder.get_object('discentry')
         self.yearentry = self.builder.get_object('yearentry')
         self.commententry = self.builder.get_object('commententry')
+        self.loadedlabel = self.builder.get_object('loadedlabel')
+        self.currentdirlabel = self.builder.get_object('currentdirlabel')
 
     def run(self, *args):
         """ connect ui functions and show main window """
         self.Window = self.builder.get_object("main_window")
         self.Window.set_title("mytag: Python tag editor")
         self.Window.connect("destroy", self.quit)
+        self.ConfWindow = self.builder.get_object("config_window")
         self.connectui()
+        self.loadlists()
         # prepare folder and file views
         cell = Gtk.CellRendererText()
         foldercolumn = Gtk.TreeViewColumn("Select Folder:", cell, text=0)
@@ -130,10 +151,41 @@ class mytag(object):
         #start the main GTK loop
         Gtk.main()
 
+    def loadlists(self):
+        # create all the tag lists
+        self.title = []
+        self.artist = []
+        self.album = []
+        self.albumartist = []
+        self.genre = []
+        self.track = []
+        self.disc = []
+        self.year = []
+        self.comment = []
+        self.tracklist = []
+        self.trackselection = [self.title, self.artist, self.album, 
+                               self.albumartist, self.genre, self.track, 
+                               self.disc, self.year, self.comment]
+        self.uibuttons = [[self.titlebutton, self.titleentry], 
+                          [self.artistbutton, self.artistentry], 
+                          [self.albumbutton, self.albumentry], 
+                          [self.albumartistbutton, self.albumartistentry], 
+                          [self.genrebutton, self.genreentry], 
+                          [self.trackbutton, self.trackentry], 
+                          [self.discbutton, self.discentry], 
+                          [self.yearbutton, self.yearentry], 
+                          [self.commentbutton, self.commententry]]
+        return
+
+    def showconfig(self, *args):
+        self.ConfWindow.show()
+
+
     def quit(self, *args):
         """ stop the process thread and close the program"""
         self.worker._Thread__stop()
         self.Window.destroy()
+        self.ConfWindow.destroy()
         Gtk.main_quit(*args)
         return False
 
@@ -146,20 +198,110 @@ class mytag(object):
     #            self.worker.run(self.test2())
     #    return True
 
+    def savetags(self, *args):
+        print 'savetagsfunction'
+        for files in self.current_files:
+            print files
+
     def loadtags(self, *args):
         """ connect chosen files with tags """
-        print type(args[0])
+        self.loadlists()
+        self.clearopenfiles()
+        # pull tags for each music file
+        for musicfiles in args[0]:
+            try:
+                item = mutagen.File(musicfiles)
+            except:
+                print 'Tag error: ' + musicfiles
+                item = None
+                pass
+            # pull tag info per item
+            if item:
+                tmp_title = str(item.get('TIT2'))
+                if tmp_title == 'None':
+                    tmp_title = None
+                tmp_artist = str(item.get('TPE1'))
+                if tmp_artist == 'None':
+                    tmp_artist = None
+                tmp_album = str(item.get('TALB'))
+                if tmp_album == 'None':
+                    tmp_album = None
+                tmp_albumartist = str(item.get('TPE2'))
+                if tmp_albumartist == 'None':
+                    tmp_albumartist = None
+                tmp_genre = None
+                tmp_track = str(item.get('TRCK'))
+                if '/' in tmp_track:
+                    tmp_track = tmp_track.split('/')[0]
+                if len(tmp_track) == 1:
+                    tmp_track = '0' + str(tmp_track)
+                if len(tmp_track) > 2:
+                    tmp_track = tmp_track[:2]
+                tmp_disc = str(item.get('TPOS'))
+                if '/' in tmp_disc:
+                    tmp_disc = tmp_disc.split('/')[0]
+                if len(tmp_disc) == 2:
+                    tmp_disc = tmp_disc[-1]
+                tmp_year = str(item.get('TDRC'))
+                if len(tmp_year) != 4:
+                    for items in YR_SPLIT:
+                        if items in tmp_year:
+                            tmp_year = tmp_year.split(items)
+                    for items in tmp_year:
+                        if len(items) == 4:
+                            tmp_year = items
+                tmp_comment = None ###??? get comment tag?
+                tmp_item = [tmp_title, tmp_artist, tmp_album, tmp_albumartist, 
+                            tmp_genre, tmp_track, tmp_disc, tmp_year, 
+                            tmp_comment]
+                # add tags to list
+                self.title.append(tmp_title)
+                self.artist.append(tmp_artist)
+                self.album.append(tmp_album)
+                self.albumartist.append(tmp_albumartist)
+                self.genre.append(tmp_genre)
+                self.track.append(tmp_track)
+                self.disc.append(tmp_disc)
+                self.year.append(tmp_year)
+                self.comment.append(tmp_comment)
+                #self.tracklist.append(tmp_item)
+        # compare tags
+        count = 0
+        for types in self.trackselection:
+            comparison = False
+            if len(args[0]) == 1:
+                comparison = True
+            for item in types[1:]:
+                if item == None:
+                    comparison = False
+                    break
+                if item != types[0]:
+                    comparison = False
+                    break
+                comparison = True
+            if comparison:
+                self.uibuttons[count][0].set_active(True)
+                if types[0]:
+                    self.uibuttons[count][1].set_text(types[0])
+                else:
+                    self.uibuttons[count][0].set_active(False)
+                    self.uibuttons[count][1].set_text('')
+            else:
+                self.uibuttons[count][0].set_active(False)
+                self.uibuttons[count][1].set_text('')
+            count = count + 1
         return
 
     def loadselection(self, *args):
         """ load files into tag editor """
         self.new_files = None
-        model, fileiter = self.contenttree.get_selection().get_selected_rows() #.get_selected()
-        refs = []
+        model, fileiter = self.contenttree.get_selection().get_selected_rows()
+        self.current_files = []
         for files in fileiter:
-            refs.append(self.current_dir + '/' + model[files][0])
-        if len(refs) > 0:
-            self.loadtags(refs)
+            tmp_file = self.current_dir + '/' + model[files][0]
+            self.current_files.append(tmp_file)
+        self.loadedlabel.set_text('Loaded: ' + str(len(fileiter)))
+        self.loadtags(self.current_files)
         return
 
     def folderclick(self, *args):
@@ -175,17 +317,28 @@ class mytag(object):
     def gohome(self, *args):
         """ go to the defined home folder """
         ### CONF OPTIONS TO BE ADDED TO CHANGE HOME
+        self.clearopenfiles()
         self.listfolder(os.getenv('HOME'))
 
     def goback(self, *args):
         """ go back the the previous directory """
         back_dir = os.path.dirname(self.current_dir)
+        self.clearopenfiles()
         self.listfolder(back_dir)
 
+    def clearopenfiles(self):
+        count = 0
+        while count < len(self.uibuttons):
+            self.uibuttons[count][0].set_active(False)
+            self.uibuttons[count][1].set_text('')
+            count = count + 1
+        self.loadedlabel.set_text('')
+        return
 
     def listfolder(self, *args):
         """ function to list the folder column """
         self.current_dir = args[0]
+        self.currentdirlabel.set_text('Current Folder: ' + self.current_dir)
         if not type(args[0]) == type(''):
             #print args[0].get_current_folder()
             self.current_dir = args[0].get_current_folder()
@@ -202,11 +355,13 @@ class mytag(object):
             test_dir = os.path.isdir(self.current_dir + '/'+ items)
             if not items[0] == '.' and test_dir:
                 self.folderlist.append([items])
+        self.clearopenfiles()
         self.listfiles()
         return
 
     def listfiles(self, *args):
         """ function to fill the file list column """
+        self.current_files = []
         files_dir = os.listdir(self.current_dir)
         files_dir.sort()
         # clear list if we have scanned before
@@ -218,7 +373,8 @@ class mytag(object):
         # search the supplied directory for items
         for items in files_dir:
             test_file = os.path.isfile(self.current_dir + '/'+ items)
-            if not items[0] == '.' and test_file:
+            test_ext = items[(items.rfind('.')):] in MEDIA_TYPES
+            if not items[0] == '.' and test_file and test_ext:
                 self.contentlist.append([items])
         return
 
