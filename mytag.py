@@ -28,12 +28,13 @@ import os
 #import random
 #import mimetypes
 import threading
+import ConfigParser
 
 try:
     import mutagen
     TAG_SUPPORT = True
 except ImportError:
-    TAG_SUPPORT = True
+    TAG_SUPPORT = False
     print 'Please install python-mutagen'
 
 from multiprocessing import Process
@@ -79,8 +80,6 @@ class mytag(object):
         self.builder = Gtk.Builder()
         self.builder.add_from_file("main.ui")
         self.builder.connect_signals(self)
-        self.current_dir = os.getenv('HOME')
-        self.new_dir = None
         self.worker = None
         if not self.worker:
             self.worker = WorkerThread(self)
@@ -122,6 +121,13 @@ class mytag(object):
         self.commententry = self.builder.get_object('commententry')
         self.loadedlabel = self.builder.get_object('loadedlabel')
         self.currentdirlabel = self.builder.get_object('currentdirlabel')
+        self.libraryentry = self.builder.get_object('libraryentry')
+        self.styleentry = self.builder.get_object('styleentry')
+        self.homeentry = self.builder.get_object('homeentry')
+        self.applybutton = self.builder.get_object("applyconf")
+        self.applybutton.connect("clicked", self.saveconf)
+        self.closebutton = self.builder.get_object("closeconf")
+        self.closebutton.connect("clicked", self.closeconf)
 
     def run(self, *args):
         """ connect ui functions and show main window """
@@ -129,6 +135,10 @@ class mytag(object):
         self.Window.set_title("mytag: Python tag editor")
         self.Window.connect("destroy", self.quit)
         self.ConfWindow = self.builder.get_object("config_window")
+        self.conf = ConfigParser.RawConfigParser()
+        self.conf.read('./mytag.conf')
+        self.tags = ['%artist%', '%albumartist%', '%album%', '%year%',
+                     '%title%', '%disc%', '%track%']
         self.connectui()
         self.loadlists()
         # prepare folder and file views
@@ -146,6 +156,11 @@ class mytag(object):
         self.contenttree.append_column(filecolumn)
         self.contenttree.set_model(self.contentlist)
         # fill the file and folder lists
+        self.homefolder = self.conf.get('conf', 'home')
+        self.current_dir = self.homefolder
+        self.new_dir = None
+        self.library = self.conf.get('conf', 'defaultlibrary')
+        self.libraryformat = self.conf.get('conf', 'outputstyle')
         self.listfolder(self.current_dir)
         self.Window.show()
         #start the main GTK loop
@@ -178,14 +193,26 @@ class mytag(object):
         return
 
     def showconfig(self, *args):
+        self.homeentry.set_text(self.conf.get('conf', 'home'))
+        self.libraryentry.set_text(self.conf.get('conf', 'defaultlibrary'))
+        self.styleentry.set_text(self.conf.get('conf', 'outputstyle'))
         self.ConfWindow.show()
+
+    def saveconf(self, *args):
+        self.conf.set('conf', 'home', self.homeentry.get_text())
+        self.conf.set('conf', 'defaultlibrary', self.libraryentry.get_text())
+        self.conf.set('conf', 'outputstyle', self.styleentry.get_text())
+
+    def closeconf(self, *args):
+        self.saveconf()
+        self.ConfWindow.hide()
 
 
     def quit(self, *args):
         """ stop the process thread and close the program"""
         self.worker._Thread__stop()
-        self.Window.destroy()
         self.ConfWindow.destroy()
+        self.Window.destroy()
         Gtk.main_quit(*args)
         return False
 
@@ -316,9 +343,8 @@ class mytag(object):
 
     def gohome(self, *args):
         """ go to the defined home folder """
-        ### CONF OPTIONS TO BE ADDED TO CHANGE HOME
         self.clearopenfiles()
-        self.listfolder(os.getenv('HOME'))
+        self.listfolder(self.homefolder)
 
     def goback(self, *args):
         """ go back the the previous directory """
