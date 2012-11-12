@@ -68,44 +68,66 @@ class mytag(object):
         self.builder.connect_signals(self)
         self.current_dir = os.getenv('HOME')
         self.new_dir = None
-        self.folderlist = self.builder.get_object('folderstore')
-        self.foldertree = self.builder.get_object('folderview')
-        self.contentlist = self.builder.get_object('filestore')
-        self.contenttree = self.builder.get_object('fileview')
         self.worker = None
         if not self.worker:
             self.worker = WorkerThread(self)
         self.run()
 
-    def run(self, *args):
-        """ create main window and connect functions """
-        self.Window = self.builder.get_object("main_window")
-        self.Window.set_title("mytag: Python tag editor")
-        self.Window.connect("destroy", self.quit)
+    def connectui(self, *args):
+        """ connect all the window wisgets """
         self.editbutton = self.builder.get_object("editbutton")
         self.editbutton.connect("clicked", self.loadselection)
         self.backbutton = self.builder.get_object("backbutton")
         self.backbutton.connect("clicked", self.goback)
         self.homebutton = self.builder.get_object("homebutton")
         self.homebutton.connect("clicked", self.gohome)
-        # prepare folder and file views
-        ## required? cell = Gtk.CellRendererText() ## required?
-        ## required? foldercolumn = Gtk.TreeViewColumn("Select Folder:", cell, text=0) ## required?
-        ## required? filecolumn = Gtk.TreeViewColumn("Select Files", cell, text=0) ## required?
+        self.folderlist = self.builder.get_object('folderstore')
+        self.foldertree = self.builder.get_object('folderview')
+        self.contentlist = self.builder.get_object('filestore')
+        self.contenttree = self.builder.get_object('fileview')
+        self.titlebutton = self.builder.get_object('titlebutton')
+        self.artistbutton = self.builder.get_object('artistbutton')
+        self.albumbutton = self.builder.get_object('albumbutton')
+        self.albumartistbutton = self.builder.get_object('albumartistbutton')
+        self.genrebutton = self.builder.get_object('genrebutton')
+        self.trackbutton = self.builder.get_object('trackbutton')
+        self.discbutton = self.builder.get_object('discbutton')
+        self.yearbutton = self.builder.get_object('yearbutton')
+        self.commentbutton = self.builder.get_object('commentbutton')
+        self.titleentry = self.builder.get_object('titleentry')
+        self.artistentry = self.builder.get_object('artistentry')
+        self.albumentry = self.builder.get_object('albumentry')
+        self.albumartistentry = self.builder.get_object('albumartistentry')
+        self.genreentry = self.builder.get_object('genreentry')
+        self.trackentry = self.builder.get_object('trackentry')
+        self.discentry = self.builder.get_object('discentry')
+        self.yearentry = self.builder.get_object('yearentry')
+        self.commententry = self.builder.get_object('commententry')
 
+    def run(self, *args):
+        """ connect ui functions and show main window """
+        self.Window = self.builder.get_object("main_window")
+        self.Window.set_title("mytag: Python tag editor")
+        self.Window.connect("destroy", self.quit)
+        self.connectui()
+        # prepare folder and file views
+        cell = Gtk.CellRendererText()
+        foldercolumn = Gtk.TreeViewColumn("Select Folder:", cell, text=0)
+        filecolumn = Gtk.TreeViewColumn("Select Files", cell, text=0)
+        # set up folder list
         self.folderview = self.builder.get_object("folderview")
         self.folderview.connect("row-activated", self.folderclick)
-        self.listfolder(self.current_dir)
-        ## required? self.foldertree.set_model(self.folderlist)
-        ## required? self.foldertree.append_column(foldercolumn)
-        ## required? self.foldertree.set_model(self.folderlist)
-
+        self.foldertree.append_column(foldercolumn)
+        self.foldertree.set_model(self.folderlist)
+        # set up file list
         self.fileview = self.builder.get_object("fileview")
         self.fileview.connect("row-activated", self.loadselection)
-        
-        ## required? self.contenttree.append_column(filecolumn)
-        ## required? self.contenttree.set_model(self.filelist)
+        self.contenttree.append_column(filecolumn)
+        self.contenttree.set_model(self.contentlist)
+        # fill the file and folder lists
+        self.listfolder(self.current_dir)
         self.Window.show()
+        #start the main GTK loop
         Gtk.main()
 
     def quit(self, *args):
@@ -116,6 +138,7 @@ class mytag(object):
         return False
 
     #def workermethods(self, *args):
+    #    """ used to send multiple methods to the workerthread... """
     #    for items in args:
     #        if items.get_tooltip_text() == 'Reload the folder list':
     #            self.worker.run(self.test())
@@ -123,25 +146,20 @@ class mytag(object):
     #            self.worker.run(self.test2())
     #    return True
 
+    def loadtags(self, *args):
+        """ connect chosen files with tags """
+        print type(args[0])
+        return
+
     def loadselection(self, *args):
         """ load files into tag editor """
         self.new_files = None
         model, fileiter = self.contenttree.get_selection().get_selected_rows() #.get_selected()
         refs = []
         for files in fileiter:
-            refs.append(Gtk.TreeRowReference.new(model, files))
-            print files
-            self.contenttree.get_selection(model, files)
-        print refs
-        #if fileiter:
-        #    print model[fileiter][0]
-        #    self.new_files = self.current_dir + '/' + model[fileiter][0]
-        #print self.new_files
-        #print dir(self.contenttree.get_selected_rows())
-        #print self.contenttree.get_selected_rows().get_selected()
-        #print self.contenttree.get_selected_rows().get_selected()
-        #if os.path.isfile(self.new_files):
-        #    self.listfolder(self.new_files)
+            refs.append(self.current_dir + '/' + model[files][0])
+        if len(refs) > 0:
+            self.loadtags(refs)
         return
 
     def folderclick(self, *args):
@@ -169,7 +187,7 @@ class mytag(object):
         """ function to list the folder column """
         self.current_dir = args[0]
         if not type(args[0]) == type(''):
-            print args[0].get_current_folder()
+            #print args[0].get_current_folder()
             self.current_dir = args[0].get_current_folder()
         self.filelist = os.listdir(self.current_dir)
         self.filelist.sort()
@@ -189,7 +207,6 @@ class mytag(object):
 
     def listfiles(self, *args):
         """ function to fill the file list column """
-        print self.current_dir
         files_dir = os.listdir(self.current_dir)
         files_dir.sort()
         # clear list if we have scanned before

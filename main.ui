@@ -42,7 +42,7 @@
                 <property name="model">filestore</property>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection" id="treeview-selection1">
-                  <property name="mode">multiple</property>
+                    <property name="mode">multiple</property>
                   </object>
                 </child>
               </object>
@@ -222,7 +222,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entry1">
+                  <object class="GtkEntry" id="titleentry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
@@ -236,7 +236,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entry2">
+                  <object class="GtkEntry" id="artistentry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
@@ -250,7 +250,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entry3">
+                  <object class="GtkEntry" id="albumentry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
@@ -264,7 +264,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entry4">
+                  <object class="GtkEntry" id="albumartistentry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
@@ -278,7 +278,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entry5">
+                  <object class="GtkEntry" id="genreentry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
@@ -292,7 +292,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entry6">
+                  <object class="GtkEntry" id="trackentry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
@@ -306,7 +306,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entry7">
+                  <object class="GtkEntry" id="discentry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
@@ -320,7 +320,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entry8">
+                  <object class="GtkEntry" id="yearentry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
@@ -334,7 +334,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entry9">
+                  <object class="GtkEntry" id="commententry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
