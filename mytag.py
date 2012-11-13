@@ -31,7 +31,7 @@ import threading
 import ConfigParser
 import sys
 
-from multiprocessing import Process
+#from multiprocessing import Process
 from threading import Thread
 
 from gi.repository import Gtk
@@ -47,11 +47,12 @@ try:
     TAG_SUPPORT = True
 except ImportError:
     TAG_SUPPORT = False
-    pass
 
 
 MEDIA_TYPES = ['.m4a', '.flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
 YR_SPLIT = ['-', '/', '\\']
+MUSIC_TAGS = ['%artist%', '%albumartist%', '%album%', '%year%',
+                 '%title%', '%disc%', '%track%']
 
 
 class WorkerThread(Thread):
@@ -78,9 +79,10 @@ class WorkerThread(Thread):
         Thread.__init__(self)
 
 
-class mytag(object):
+class MYTAG(object):
     """ browse folders and set set using ui """
     def __init__(self):
+        """ start mytag """
         if not TAG_SUPPORT:
             raise Exception('Please install python-mutagen')
         self.builder = Gtk.Builder()
@@ -89,22 +91,26 @@ class mytag(object):
         self.worker = None
         if not self.worker:
             self.worker = WorkerThread(self)
-        self.run()
-
-    def connectui(self, *args):
-        """ connect all the window wisgets """
+        # get config info
+        self.conf = ConfigParser.RawConfigParser()
+        self.conf.read('./mytag.conf')
+        self.homefolder = self.conf.get('conf', 'home')
+        self.library = self.conf.get('conf', 'defaultlibrary')
+        self.libraryformat = self.conf.get('conf', 'outputstyle')
+        self.current_dir = self.homefolder
+        self.current_files = None
+        self.filelist = None
+        # load main window items
+        self.window = self.builder.get_object("main_window")
         self.settingsbutton = self.builder.get_object("settingsbutton")
-        self.settingsbutton.connect("clicked", self.showconfig)
         self.editbutton = self.builder.get_object("editbutton")
-        self.editbutton.connect("clicked", self.loadselection)
         self.backbutton = self.builder.get_object("backbutton")
-        self.backbutton.connect("clicked", self.goback)
         self.homebutton = self.builder.get_object("homebutton")
-        self.homebutton.connect("clicked", self.gohome)
-        self.homebutton = self.builder.get_object("gobutton")
-        self.homebutton.connect("clicked", self.savetags)
+        self.gobutton = self.builder.get_object("gobutton")
         self.folderlist = self.builder.get_object('folderstore')
         self.foldertree = self.builder.get_object('folderview')
+        self.folderview = self.builder.get_object("folderview")
+        self.fileview = self.builder.get_object("fileview")
         self.contentlist = self.builder.get_object('filestore')
         self.contenttree = self.builder.get_object('fileview')
         self.titlebutton = self.builder.get_object('titlebutton')
@@ -127,48 +133,60 @@ class mytag(object):
         self.commententry = self.builder.get_object('commententry')
         self.loadedlabel = self.builder.get_object('loadedlabel')
         self.currentdirlabel = self.builder.get_object('currentdirlabel')
+        # load config window items
+        self.confwindow = self.builder.get_object("config_window")
         self.libraryentry = self.builder.get_object('libraryentry')
         self.styleentry = self.builder.get_object('styleentry')
         self.homeentry = self.builder.get_object('homeentry')
         self.applybutton = self.builder.get_object("applyconf")
-        self.applybutton.connect("clicked", self.saveconf)
         self.closebutton = self.builder.get_object("closeconf")
-        self.closebutton.connect("clicked", self.closeconf)
-
-    def run(self, *args):
-        """ connect ui functions and show main window """
-        self.Window = self.builder.get_object("main_window")
-        self.Window.connect("destroy", self.quit)
-        self.ConfWindow = self.builder.get_object("config_window")
-        self.conf = ConfigParser.RawConfigParser()
-        self.conf.read('./mytag.conf')
-        self.tags = ['%artist%', '%albumartist%', '%album%', '%year%',
-                     '%title%', '%disc%', '%track%']
-        self.connectui()
+        # set tag items
+        self.title = None
+        self.artist = None
+        self.album = None
+        self.albumartist = None
+        self.genre = None
+        self.track = None
+        self.disc = None
+        self.year = None
+        self.comment = None
+        self.tracklist = None
+        self.trackselection = None
+        self.uibuttons = None
+        # create lists and connect actions
         self.loadlists()
-        # prepare folder and file views
+        self.connectui()
+        self.run()
+
+    def connectui(self):
+        """ connect all the window wisgets """
+        # main window actions
+        self.window.connect("destroy", self.quit)
+        self.settingsbutton.connect("clicked", self.showconfig)
+        self.editbutton.connect("clicked", self.loadselection)
+        self.backbutton.connect("clicked", self.goback)
+        self.homebutton.connect("clicked", self.gohome)
+        self.gobutton.connect("clicked", self.savetags)
+        # config window actions
+        self.applybutton.connect("clicked", self.saveconf)
+        self.closebutton.connect("clicked", self.closeconf)
         cell = Gtk.CellRendererText()
         foldercolumn = Gtk.TreeViewColumn("Select Folder:", cell, text=0)
         filecolumn = Gtk.TreeViewColumn("Select Files", cell, text=0)
         # set up folder list
-        self.folderview = self.builder.get_object("folderview")
         self.folderview.connect("row-activated", self.folderclick)
         self.foldertree.append_column(foldercolumn)
         self.foldertree.set_model(self.folderlist)
         # set up file list
-        self.fileview = self.builder.get_object("fileview")
         self.fileview.connect("row-activated", self.loadselection)
         self.contenttree.append_column(filecolumn)
         self.contenttree.set_model(self.contentlist)
-        # fill the file and folder lists
-        self.homefolder = self.conf.get('conf', 'home')
-        self.current_dir = self.homefolder
-        self.new_dir = None
-        self.library = self.conf.get('conf', 'defaultlibrary')
-        self.libraryformat = self.conf.get('conf', 'outputstyle')
+        # list default dir
         self.listfolder(self.current_dir)
-        self.Window.show()
-        #start the main GTK loop
+
+    def run(self):
+        """ show the main window and start the main GTK loop """
+        self.window.show()
         Gtk.main()
 
     def loadlists(self):
@@ -199,10 +217,14 @@ class mytag(object):
 
     def showconfig(self, *args):
         """ fill and show the config window """
-        self.homeentry.set_text(self.conf.get('conf', 'home'))
-        self.libraryentry.set_text(self.conf.get('conf', 'defaultlibrary'))
-        self.styleentry.set_text(self.conf.get('conf', 'outputstyle'))
-        self.ConfWindow.show()
+        self.conf.read('./mytag.conf')
+        self.homefolder = self.conf.get('conf', 'home')
+        self.library = self.conf.get('conf', 'defaultlibrary')
+        self.libraryformat = self.conf.get('conf', 'outputstyle')
+        self.homeentry.set_text(self.homefolder)
+        self.libraryentry.set_text(self.library)
+        self.styleentry.set_text(self.libraryformat)
+        self.confwindow.show()
 
     def saveconf(self, *args):
         """ save any config changes """
@@ -212,13 +234,13 @@ class mytag(object):
 
     def closeconf(self, *args):
         """ hide the config window """
-        self.ConfWindow.hide()
+        self.confwindow.hide()
 
     def quit(self, *args):
         """ stop the process thread and close the program"""
         self.worker._Thread__stop()
-        self.ConfWindow.destroy()
-        self.Window.destroy()
+        self.confwindow.destroy()
+        self.window.destroy()
         Gtk.main_quit(*args)
         return False
 
@@ -263,7 +285,7 @@ class mytag(object):
                 tmp_albumartist = str(item.get('TPE2'))
                 if tmp_albumartist == 'None':
                     tmp_albumartist = None
-                tmp_genre = None
+                tmp_genre = None # ??? get genre tag?
                 tmp_track = str(item.get('TRCK'))
                 if '/' in tmp_track:
                     tmp_track = tmp_track.split('/')[0]
@@ -285,9 +307,9 @@ class mytag(object):
                         if len(items) == 4:
                             tmp_year = items
                 tmp_comment = None  # ??? get comment tag?
-                tmp_item = [tmp_title, tmp_artist, tmp_album, tmp_albumartist,
-                            tmp_genre, tmp_track, tmp_disc, tmp_year,
-                            tmp_comment]
+                #tmp_item = [tmp_title, tmp_artist, tmp_album, tmp_albumartist,
+                #            tmp_genre, tmp_track, tmp_disc, tmp_year,
+                #            tmp_comment]
                 # add tags to list
                 self.title.append(tmp_title)
                 self.artist.append(tmp_artist)
@@ -328,7 +350,6 @@ class mytag(object):
 
     def loadselection(self, *args):
         """ load files into tag editor """
-        self.new_files = None
         model, fileiter = self.contenttree.get_selection().get_selected_rows()
         self.current_files = []
         for files in fileiter:
@@ -342,9 +363,9 @@ class mytag(object):
         """ traverse folders on double click """
         model, treeiter = self.foldertree.get_selection().get_selected()
         if treeiter:
-            self.new_dir = self.current_dir + '/' + model[treeiter][0]
-        if os.path.isdir(self.new_dir):
-            self.listfolder(self.new_dir)
+            new_dir = self.current_dir + '/' + model[treeiter][0]
+        if os.path.isdir(new_dir):
+            self.listfolder(new_dir)
         return
 
     def gohome(self, *args):
@@ -414,4 +435,4 @@ class mytag(object):
 
 if __name__ == "__main__":
     Gdk.threads_init()
-    mytag()
+    MYTAG()
