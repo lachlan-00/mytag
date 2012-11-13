@@ -183,17 +183,17 @@ class mytag(object):
         self.year = []
         self.comment = []
         self.tracklist = []
-        self.trackselection = [self.title, self.artist, self.album, 
-                               self.albumartist, self.genre, self.track, 
+        self.trackselection = [self.title, self.artist, self.album,
+                               self.albumartist, self.genre, self.track,
                                self.disc, self.year, self.comment]
-        self.uibuttons = [[self.titlebutton, self.titleentry], 
-                          [self.artistbutton, self.artistentry], 
-                          [self.albumbutton, self.albumentry], 
-                          [self.albumartistbutton, self.albumartistentry], 
-                          [self.genrebutton, self.genreentry], 
-                          [self.trackbutton, self.trackentry], 
-                          [self.discbutton, self.discentry], 
-                          [self.yearbutton, self.yearentry], 
+        self.uibuttons = [[self.titlebutton, self.titleentry],
+                          [self.artistbutton, self.artistentry],
+                          [self.albumbutton, self.albumentry],
+                          [self.albumartistbutton, self.albumartistentry],
+                          [self.genrebutton, self.genreentry],
+                          [self.trackbutton, self.trackentry],
+                          [self.discbutton, self.discentry],
+                          [self.yearbutton, self.yearentry],
                           [self.commentbutton, self.commententry]]
         return
 
@@ -213,7 +213,6 @@ class mytag(object):
     def closeconf(self, *args):
         """ hide the config window """
         self.ConfWindow.hide()
-
 
     def quit(self, *args):
         """ stop the process thread and close the program"""
@@ -285,9 +284,9 @@ class mytag(object):
                     for items in tmp_year:
                         if len(items) == 4:
                             tmp_year = items
-                tmp_comment = None ###??? get comment tag?
-                tmp_item = [tmp_title, tmp_artist, tmp_album, tmp_albumartist, 
-                            tmp_genre, tmp_track, tmp_disc, tmp_year, 
+                tmp_comment = None  # ??? get comment tag?
+                tmp_item = [tmp_title, tmp_artist, tmp_album, tmp_albumartist,
+                            tmp_genre, tmp_track, tmp_disc, tmp_year,
                             tmp_comment]
                 # add tags to list
                 self.title.append(tmp_title)
@@ -348,7 +347,6 @@ class mytag(object):
             self.listfolder(self.new_dir)
         return
 
-
     def gohome(self, *args):
         """ go to the defined home folder """
         self.clearopenfiles()
@@ -387,7 +385,7 @@ class mytag(object):
             self.foldertree.remove(items.iter)
         # search the supplied directory for items
         for items in self.filelist:
-            test_dir = os.path.isdir(self.current_dir + '/'+ items)
+            test_dir = os.path.isdir(self.current_dir + '/' + items)
             if not items[0] == '.' and test_dir:
                 self.folderlist.append([items])
         self.clearopenfiles()
@@ -407,7 +405,7 @@ class mytag(object):
             self.contenttree.remove(items.iter)
         # search the supplied directory for items
         for items in files_dir:
-            test_file = os.path.isfile(self.current_dir + '/'+ items)
+            test_file = os.path.isfile(self.current_dir + '/' + items)
             test_ext = items[(items.rfind('.')):] in MEDIA_TYPES
             if not items[0] == '.' and test_file and test_ext:
                 self.contentlist.append([items])
@@ -417,4 +415,3 @@ class mytag(object):
 if __name__ == "__main__":
     Gdk.threads_init()
     mytag()
-
