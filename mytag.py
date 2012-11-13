@@ -41,9 +41,9 @@ from gi.repository import Gdk
 if sys.version[0] == 3:
     raise Exception('not python3 compatible, please use python 2.x')
 
-# python-mutagen required for editing and loading tags
+# python-eyeD3 required for editing and loading tags
 try:
-    import mutagen
+    import eyeD3
     TAG_SUPPORT = True
 except ImportError:
     TAG_SUPPORT = False
@@ -84,7 +84,7 @@ class MYTAG(object):
     def __init__(self):
         """ start mytag """
         if not TAG_SUPPORT:
-            raise Exception('Please install python-mutagen')
+            raise Exception('Please install python-eyed3')
         self.builder = Gtk.Builder()
         self.builder.add_from_file("main.ui")
         self.builder.connect_signals(self)
@@ -273,39 +273,45 @@ class MYTAG(object):
             tmp_year = None
             tmp_comment = None
             try:
-                item = mutagen.File(files)
+                item = eyeD3.Tag()
+                item.link(files)
+                item.setVersion(eyeD3.ID3_V2_4)
+                item.setTextEncoding(eyeD3.UTF_8_ENCODING)
             except:
                 print 'Tag error: ' + files
                 item = None
                 pass
             if item:
                 # get the current tags
-                current_title = str(item.get('TIT2'))
+                current_title = item.getTitle()
                 if current_title == 'None':
                     current_title = None
-                current_artist = str(item.get('TPE1'))
+                current_artist = item.getArtist('TPE1')
                 if current_artist == 'None':
                     current_artist = None
-                current_album = str(item.get('TALB'))
+                current_album = item.getAlbum()
                 if current_album == 'None':
                     current_album = None
-                current_albumartist = str(item.get('TPE2'))
+                current_albumartist = item.getArtist('TPE2')
                 if current_albumartist == 'None':
                     current_albumartist = None
-                current_genre = None # ??? get genre tag?
-                current_track = str(item.get('TRCK'))
+                current_genre = str(item.getGenre())
+                if current_genre == 'None':
+                    current_genre = None
+                current_track = str(item.getTrackNum()[0])
                 if '/' in current_track:
                     current_track = current_track.split('/')[0]
                 if len(current_track) == 1:
                     current_track = '0' + str(current_track)
                 if len(current_track) > 2:
                     current_track = current_track[:2]
-                current_disc = str(item.get('TPOS'))
+                #current_disc = str(item.get('TPOS'))
+                current_disc = str(item.getDiscNum()[0])
                 if '/' in current_disc:
                     current_disc = current_disc.split('/')[0]
                 if len(current_disc) == 2:
                     current_disc = current_disc[-1]
-                current_year = str(item.get('TDRC'))
+                current_year = str(item.getYear())
                 if len(current_year) != 4:
                     for items in YR_SPLIT:
                         if items in current_year:
@@ -315,7 +321,9 @@ class MYTAG(object):
                             current_year = items
                 if current_year == 'None':
                     current_year = None
-                current_comment = None  # ??? get comment tag?
+                current_comment = item.getComment()
+                if current_comment == 'None':
+                    current_comment = None
                 # get the changes from the UI
                 for changes in tmp_changes:
                     if changes[0] == 0:
@@ -337,61 +345,34 @@ class MYTAG(object):
                     if changes[0] == 8:
                         tmp_comment = changes[1]
                 # set changes
-            try:
-                item = mutagen.easyid3.EasyID3(files)
-            except:
-                print 'Tag error: ' + files
-                item = None
-                pass
-            if item:
                 if tmp_title != None and tmp_title != current_title:
-                    #print 'Title change'
-                    #print tmp_title
-                    item['title'] = tmp_title
-                    #print ''
+                    item.setTitle(tmp_title)
                 if tmp_artist != None and tmp_artist != current_artist:
-                    #print 'artist change'
-                    #print tmp_artist
-                    item['artist'] = tmp_artist
-                    #print ''
+                    item.setArtist(tmp_artist)
                 if tmp_album != None and tmp_album != current_album:
-                    #print 'album change'
-                    #print tmp_album
-                    item['album'] = tmp_album
-                    #print ''
-                if tmp_albumartist != None and tmp_albumartist != current_albumartist:
-                    #print 'albumartist change'
-                    #print tmp_albumartist
-                    item['performer'] = tmp_albumartist
-                    #print ''
+                    item.setAlbum(tmp_album)
+                if tmp_albumartist != None and (tmp_albumartist !=
+                        current_albumartist):
+                    item.setArtist(tmp_albumartist, 'TPE2')
                 if tmp_genre != None and tmp_genre != current_genre:
-                    #print 'genre change'
-                    #print tmp_genre
-                    item['genre'] = tmp_genre
-                    #print ''
+                    item.setGenre(tmp_genre)
                 if tmp_track != None and tmp_track != current_track:
-                    #print 'track change'
-                    #print tmp_track
-                    item['tracknumber'] = tmp_track
-                    #print ''
+                    item.setTitle(tmp_track)
                 if tmp_disc != None and tmp_disc != current_disc:
-                    #print 'disc change'
-                    #print tmp_disc
-                    item['discnumber'] = tmp_disc
-                    #print ''
+                    item.setDiscNum(tmp_disc, None)
                 if tmp_year != None and tmp_year != current_year:
-                    #print 'year change'
-                    #print tmp_year
-                    item['date'] = tmp_year
-                    #print ''
-                #if tmp_comment != None and tmp_comment != current_comment:
-                #    print 'comment change'
-                #    print tmp_comment
-                #    item['comment'] = tmp_comment
-                #    print ''
+                    try:
+                        int(tmp_year)
+                        item.setDate(tmp_year, None)
+                    except ValueError:
+                        print 'Invalid Year'
+                if tmp_comment != None and tmp_comment != current_comment:
+                    item.removeComments()
+                    item.addComment(tmp_comment)
                 # write changes
-                print item
-                # item.save()
+                item.update(eyeD3.ID3_V2_4)
+                # reload new tags
+                self.loadtags(self.current_files)
 
     def loadtags(self, *args):
         """ connect chosen files with tags """
@@ -400,41 +381,45 @@ class MYTAG(object):
         # pull tags for each music file
         for musicfiles in args[0]:
             try:
-                item = mutagen.File(musicfiles)
+                item = eyeD3.Tag()
+                item.link(musicfiles)
+                item.setVersion(eyeD3.ID3_V2_4)
+                item.setTextEncoding(eyeD3.UTF_8_ENCODING)
             except:
                 print 'Tag error: ' + musicfiles
                 item = None
-                pass
             # pull tag info per item
             if item:
-                tmp_title = str(item.get('TIT2'))
+                tmp_title = item.getTitle()
                 if tmp_title == 'None':
                     tmp_title = None
-                tmp_artist = str(item.get('TPE1'))
+                tmp_artist = item.getArtist('TPE1')
                 if tmp_artist == 'None':
                     tmp_artist = None
-                tmp_album = str(item.get('TALB'))
+                tmp_album = item.getAlbum()
                 if tmp_album == 'None':
                     tmp_album = None
-                tmp_albumartist = str(item.get('TPE2'))
+                tmp_albumartist = item.getArtist('TPE2')
                 if tmp_albumartist == 'None':
                     tmp_albumartist = None
-                tmp_genre = str(item.get('TCON'))
+                tmp_genre = str(item.getGenre())
+                if ')' in tmp_genre:
+                    tmp_genre = tmp_genre.split(')')[1]
                 if tmp_genre == 'None':
                     tmp_genre = None
-                tmp_track = str(item.get('TRCK'))
+                tmp_track = str(item.getTrackNum()[0])
                 if '/' in tmp_track:
                     tmp_track = tmp_track.split('/')[0]
                 if len(tmp_track) == 1:
                     tmp_track = '0' + str(tmp_track)
                 if len(tmp_track) > 2:
                     tmp_track = tmp_track[:2]
-                tmp_disc = str(item.get('TPOS'))
+                tmp_disc = str(item.getDiscNum()[0])
                 if '/' in tmp_disc:
                     tmp_disc = tmp_disc.split('/')[0]
                 if len(tmp_disc) == 2:
                     tmp_disc = tmp_disc[-1]
-                tmp_year = str(item.get('TDRC'))
+                tmp_year = str(item.getYear())
                 if len(tmp_year) != 4:
                     for items in YR_SPLIT:
                         if items in tmp_year:
@@ -444,12 +429,9 @@ class MYTAG(object):
                             tmp_year = items
                 if tmp_year == 'None':
                     tmp_year = None
-                tmp_comment = str(item.get("COMM:Comment:'XXX'"))
+                tmp_comment = item.getComment()
                 if tmp_comment == 'None':
                     tmp_comment = None
-                #tmp_item = [tmp_title, tmp_artist, tmp_album, tmp_albumartist,
-                #            tmp_genre, tmp_track, tmp_disc, tmp_year,
-                #            tmp_comment]
                 # add tags to list
                 self.title.append(tmp_title)
                 self.artist.append(tmp_artist)
@@ -460,10 +442,8 @@ class MYTAG(object):
                 self.disc.append(tmp_disc)
                 self.year.append(tmp_year)
                 self.comment.append(tmp_comment)
-                #self.tracklist.append(tmp_item)
         # compare tags
         count = 0
-        print self.trackselection
         for types in self.trackselection:
             comparison = False
             if len(args[0]) == 1:
@@ -538,7 +518,6 @@ class MYTAG(object):
         self.current_dir = args[0]
         self.currentdirlabel.set_text('Current Folder: ' + self.current_dir)
         if not type(args[0]) == type(''):
-            #print args[0].get_current_folder()
             self.current_dir = args[0].get_current_folder()
         self.filelist = os.listdir(self.current_dir)
         self.filelist.sort()

@@ -18,7 +18,7 @@ These extra features highlight how much tagging programs are missing when you ar
 Just because you're editing tags doesn't mean that your files are corect either!
 
 Requires:
-python 2.7 and python-mutagen to be installed.
+python 2.7 and python-eyed3 to be installed.
 
 
 Links:
