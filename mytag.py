@@ -32,7 +32,7 @@ import ConfigParser
 import sys
 
 #from multiprocessing import Process
-from threading import Thread
+#from threading import Thread
 
 from gi.repository import Gtk
 from gi.repository import Gdk
@@ -55,7 +55,7 @@ MUSIC_TAGS = ['%artist%', '%albumartist%', '%album%', '%year%',
                  '%title%', '%disc%', '%track%']
 
 
-class WorkerThread(Thread):
+class WorkerThread(threading.Thread):
     """ run a separate thread to the ui """
     def __init__(self, notify_window):
         """Init Worker Thread Class."""
@@ -76,7 +76,7 @@ class WorkerThread(Thread):
                 args()
         except TypeError:
             pass
-        Thread.__init__(self)
+        threading.Thread.__init__(self)
 
 
 class MYTAG(object):
@@ -255,9 +255,144 @@ class MYTAG(object):
 
     def savetags(self, *args):
         """ update the loaded files with new tags """
-        print 'savetagsfunction'
+        # check for active changes
+        count = 0
+        tmp_changes = []
+        while count < len(self.uibuttons):
+            if self.uibuttons[count][0].get_active():
+                tmp_changes.append([count, self.uibuttons[count][1].get_text()])
+            count = count + 1
         for files in self.current_files:
-            print files
+            tmp_title = None
+            tmp_artist = None
+            tmp_album = None
+            tmp_albumartist = None
+            tmp_genre = None
+            tmp_track = None
+            tmp_disc = None
+            tmp_year = None
+            tmp_comment = None
+            try:
+                item = mutagen.File(files)
+            except:
+                print 'Tag error: ' + files
+                item = None
+                pass
+            if item:
+                # get the current tags
+                current_title = str(item.get('TIT2'))
+                if current_title == 'None':
+                    current_title = None
+                current_artist = str(item.get('TPE1'))
+                if current_artist == 'None':
+                    current_artist = None
+                current_album = str(item.get('TALB'))
+                if current_album == 'None':
+                    current_album = None
+                current_albumartist = str(item.get('TPE2'))
+                if current_albumartist == 'None':
+                    current_albumartist = None
+                current_genre = None # ??? get genre tag?
+                current_track = str(item.get('TRCK'))
+                if '/' in current_track:
+                    current_track = current_track.split('/')[0]
+                if len(current_track) == 1:
+                    current_track = '0' + str(current_track)
+                if len(current_track) > 2:
+                    current_track = current_track[:2]
+                current_disc = str(item.get('TPOS'))
+                if '/' in current_disc:
+                    current_disc = current_disc.split('/')[0]
+                if len(current_disc) == 2:
+                    current_disc = current_disc[-1]
+                current_year = str(item.get('TDRC'))
+                if len(current_year) != 4:
+                    for items in YR_SPLIT:
+                        if items in current_year:
+                            current_year = current_year.split(items)
+                    for items in current_year:
+                        if len(items) == 4:
+                            current_year = items
+                if current_year == 'None':
+                    current_year = None
+                current_comment = None  # ??? get comment tag?
+                # get the changes from the UI
+                for changes in tmp_changes:
+                    if changes[0] == 0:
+                        tmp_title = changes[1]
+                    if changes[0] == 1:
+                        tmp_artist = changes[1]
+                    if changes[0] == 2:
+                        tmp_album = changes[1]
+                    if changes[0] == 3:
+                        tmp_albumartist = changes[1]
+                    if changes[0] == 4:
+                        tmp_genre = changes[1]
+                    if changes[0] == 5:
+                        tmp_track = changes[1]
+                    if changes[0] == 6:
+                        tmp_disc = changes[1]
+                    if changes[0] == 7:
+                        tmp_year = changes[1]
+                    if changes[0] == 8:
+                        tmp_comment = changes[1]
+                # set changes
+            try:
+                item = mutagen.easyid3.EasyID3(files)
+            except:
+                print 'Tag error: ' + files
+                item = None
+                pass
+            if item:
+                print item
+                if tmp_title != None and tmp_title != current_title:
+                    #print 'Title change'
+                    #print tmp_title
+                    item['title'] = tmp_title
+                    #print ''
+                if tmp_artist != None and tmp_artist != current_artist:
+                    #print 'artist change'
+                    #print tmp_artist
+                    item['artist'] = tmp_artist
+                    #print ''
+                if tmp_album != None and tmp_album != current_album:
+                    #print 'album change'
+                    #print tmp_album
+                    item['album'] = tmp_album
+                    #print ''
+                if tmp_albumartist != None and tmp_albumartist != current_albumartist:
+                    #print 'albumartist change'
+                    #print tmp_albumartist
+                    item['performer'] = tmp_albumartist
+                    #print ''
+                if tmp_genre != None and tmp_genre != current_genre:
+                    #print 'genre change'
+                    #print tmp_genre
+                    item['genre'] = tmp_genre
+                    #print ''
+                if tmp_track != None and tmp_track != current_track:
+                    #print 'track change'
+                    #print tmp_track
+                    item['tracknumber'] = tmp_track
+                    #print ''
+                if tmp_disc != None and tmp_disc != current_disc:
+                    #print 'disc change'
+                    #print tmp_disc
+                    item['discnumber'] = tmp_disc
+                    #print ''
+                if tmp_year != None and tmp_year != current_year:
+                    #print 'year change'
+                    #print tmp_year
+                    item['date'] = tmp_year
+                    #print ''
+                #if tmp_comment != None and tmp_comment != current_comment:
+                #    print 'comment change'
+                #    print tmp_comment
+                #    item['comment'] = tmp_comment
+                #    print ''
+                # write changes
+                print item
+                # item.save()
 
     def loadtags(self, *args):
         """ connect chosen files with tags """
@@ -306,6 +441,8 @@ class MYTAG(object):
                     for items in tmp_year:
                         if len(items) == 4:
                             tmp_year = items
+                if tmp_year == 'None':
+                    tmp_year = None
                 tmp_comment = None  # ??? get comment tag?
                 #tmp_item = [tmp_title, tmp_artist, tmp_album, tmp_albumartist,
                 #            tmp_genre, tmp_track, tmp_disc, tmp_year,
