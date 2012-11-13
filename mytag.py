@@ -344,7 +344,6 @@ class MYTAG(object):
                 item = None
                 pass
             if item:
-                print item
                 if tmp_title != None and tmp_title != current_title:
                     #print 'Title change'
                     #print tmp_title
@@ -420,7 +419,9 @@ class MYTAG(object):
                 tmp_albumartist = str(item.get('TPE2'))
                 if tmp_albumartist == 'None':
                     tmp_albumartist = None
-                tmp_genre = None # ??? get genre tag?
+                tmp_genre = str(item.get('TCON'))
+                if tmp_genre == 'None':
+                    tmp_genre = None
                 tmp_track = str(item.get('TRCK'))
                 if '/' in tmp_track:
                     tmp_track = tmp_track.split('/')[0]
@@ -443,7 +444,9 @@ class MYTAG(object):
                             tmp_year = items
                 if tmp_year == 'None':
                     tmp_year = None
-                tmp_comment = None  # ??? get comment tag?
+                tmp_comment = str(item.get("COMM:Comment:'XXX'"))
+                if tmp_comment == 'None':
+                    tmp_comment = None
                 #tmp_item = [tmp_title, tmp_artist, tmp_album, tmp_albumartist,
                 #            tmp_genre, tmp_track, tmp_disc, tmp_year,
                 #            tmp_comment]
@@ -460,6 +463,7 @@ class MYTAG(object):
                 #self.tracklist.append(tmp_item)
         # compare tags
         count = 0
+        print self.trackselection
         for types in self.trackselection:
             comparison = False
             if len(args[0]) == 1:
