@@ -485,7 +485,10 @@ class MYTAG(object):
                     self.uibuttons[count][1].set_text('')
             else:
                 self.uibuttons[count][0].set_active(False)
-                self.uibuttons[count][1].set_text('')
+                if not types[0]:
+                    self.uibuttons[count][1].set_text('')
+                else:
+                    self.uibuttons[count][1].set_text('[Multiple]')
             count = count + 1
         return
 
