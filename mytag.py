@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-""" mytag
+""" mytag: Python tag editor
     ----------------Authors----------------
     Lachlan de Waard <lachlan.00@gmail.com>
     ----------------Licence----------------
@@ -29,13 +29,7 @@ import os
 #import mimetypes
 import threading
 import ConfigParser
-
-try:
-    import mutagen
-    TAG_SUPPORT = True
-except ImportError:
-    TAG_SUPPORT = False
-    print 'Please install python-mutagen'
+import sys
 
 from multiprocessing import Process
 from threading import Thread
@@ -43,12 +37,25 @@ from threading import Thread
 from gi.repository import Gtk
 from gi.repository import Gdk
 
+# quit if using python3
+if sys.version[0] == 3:
+    raise Exception('not python3 compatible, please use python 2.x')
+
+# python-mutagen required for editing and loading tags
+try:
+    import mutagen
+    TAG_SUPPORT = True
+except ImportError:
+    TAG_SUPPORT = False
+    pass
+
+
 MEDIA_TYPES = ['.m4a', '.flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
 YR_SPLIT = ['-', '/', '\\']
 
 
 class WorkerThread(Thread):
-    """Worker Thread Class."""
+    """ run a separate thread to the ui """
     def __init__(self, notify_window):
         """Init Worker Thread Class."""
         super(WorkerThread, self).__init__()
@@ -62,7 +69,7 @@ class WorkerThread(Thread):
         return None
 
     def run(self, *args):
-        """ run the desired method in a background thread """
+        """ run the desired method in the background thread """
         try:
             if len(args) == 1:
                 args()
@@ -72,11 +79,10 @@ class WorkerThread(Thread):
 
 
 class mytag(object):
-
-
+    """ browse folders and set set using ui """
     def __init__(self):
         if not TAG_SUPPORT:
-            return False
+            raise Exception('Please install python-mutagen')
         self.builder = Gtk.Builder()
         self.builder.add_from_file("main.ui")
         self.builder.connect_signals(self)
@@ -132,7 +138,6 @@ class mytag(object):
     def run(self, *args):
         """ connect ui functions and show main window """
         self.Window = self.builder.get_object("main_window")
-        self.Window.set_title("mytag: Python tag editor")
         self.Window.connect("destroy", self.quit)
         self.ConfWindow = self.builder.get_object("config_window")
         self.conf = ConfigParser.RawConfigParser()
@@ -167,7 +172,7 @@ class mytag(object):
         Gtk.main()
 
     def loadlists(self):
-        # create all the tag lists
+        """ create/empty all the lists used for tagging """
         self.title = []
         self.artist = []
         self.album = []
@@ -193,18 +198,20 @@ class mytag(object):
         return
 
     def showconfig(self, *args):
+        """ fill and show the config window """
         self.homeentry.set_text(self.conf.get('conf', 'home'))
         self.libraryentry.set_text(self.conf.get('conf', 'defaultlibrary'))
         self.styleentry.set_text(self.conf.get('conf', 'outputstyle'))
         self.ConfWindow.show()
 
     def saveconf(self, *args):
+        """ save any config changes """
         self.conf.set('conf', 'home', self.homeentry.get_text())
         self.conf.set('conf', 'defaultlibrary', self.libraryentry.get_text())
         self.conf.set('conf', 'outputstyle', self.styleentry.get_text())
 
     def closeconf(self, *args):
-        self.saveconf()
+        """ hide the config window """
         self.ConfWindow.hide()
 
 
@@ -226,6 +233,7 @@ class mytag(object):
     #    return True
 
     def savetags(self, *args):
+        """ update the loaded files with new tags """
         print 'savetagsfunction'
         for files in self.current_files:
             print files
@@ -353,6 +361,7 @@ class mytag(object):
         self.listfolder(back_dir)
 
     def clearopenfiles(self):
+        """ clear the tags ui when changing folder """
         count = 0
         while count < len(self.uibuttons):
             self.uibuttons[count][0].set_active(False)
