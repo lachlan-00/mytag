@@ -22,11 +22,7 @@
 
 """
 
-#import shutil
 import os
-#import subprocess
-#import random
-#import mimetypes
 import threading
 import ConfigParser
 import sys
@@ -310,16 +306,7 @@ class MYTAG(object):
                     current_disc = current_disc.split('/')[0]
                 if len(current_disc) == 2:
                     current_disc = current_disc[-1]
-                current_year = str(item.getYear())
-                if len(current_year) != 4:
-                    for items in YR_SPLIT:
-                        if items in current_year:
-                            current_year = current_year.split(items)
-                    for items in current_year:
-                        if len(items) == 4:
-                            current_year = items
-                if current_year == 'None':
-                    current_year = None
+                current_year = item.getYear()
                 current_comment = item.getComment()
                 if current_comment == 'None':
                     current_comment = None
@@ -360,16 +347,16 @@ class MYTAG(object):
                 if tmp_disc != None and tmp_disc != current_disc:
                     item.setDiscNum([tmp_disc, None])
                 if tmp_year != None and tmp_year != current_year:
-                    try:
-                        int(tmp_year)
-                        item.setDate(tmp_year, None)
-                    except ValueError:
-                        print 'Invalid Year'
+                    item.setTextFrame('TDRC', tmp_year)
+                    item.setTextFrame('TDRL', tmp_year)
+                if tmp_comment == '':
+                    item.removeComments()
+                    item.update()
                 if tmp_comment != None and tmp_comment != current_comment:
                     item.removeComments()
                     item.addComment(tmp_comment)
                 # write changes
-                item.update(eyeD3.ID3_V2_4)
+                item.update(version=eyeD3.ID3_V2_4)
                 # reload new tags
                 self.loadtags(self.current_files)
 
@@ -379,6 +366,15 @@ class MYTAG(object):
         self.clearopenfiles()
         # pull tags for each music file
         for musicfiles in args[0]:
+            tmp_title = None
+            tmp_artist = None
+            tmp_album = None
+            tmp_albumartist = None
+            tmp_genre = None
+            tmp_track = None
+            tmp_disc = None
+            tmp_year = None
+            tmp_comment = None
             try:
                 item = eyeD3.Tag()
                 item.link(musicfiles)
@@ -421,14 +417,7 @@ class MYTAG(object):
                     tmp_disc = tmp_disc.split('/')[0]
                 if len(tmp_disc) == 2:
                     tmp_disc = tmp_disc[-1]
-                tmp_year = str(item.getYear())
-                if len(tmp_year) != 4:
-                    for items in YR_SPLIT:
-                        if items in tmp_year:
-                            tmp_year = tmp_year.split(items)
-                    for items in tmp_year:
-                        if len(items) == 4:
-                            tmp_year = items
+                tmp_year = item.getYear()
                 if tmp_year == 'None':
                     tmp_year = None
                 tmp_comment = item.getComment()
