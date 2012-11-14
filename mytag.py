@@ -305,7 +305,6 @@ class MYTAG(object):
                     current_track = '0' + str(current_track)
                 if len(current_track) > 2:
                     current_track = current_track[:2]
-                #current_disc = str(item.get('TPOS'))
                 current_disc = str(item.getDiscNum()[0])
                 if '/' in current_disc:
                     current_disc = current_disc.split('/')[0]
@@ -357,9 +356,9 @@ class MYTAG(object):
                 if tmp_genre != None and tmp_genre != current_genre:
                     item.setGenre(tmp_genre)
                 if tmp_track != None and tmp_track != current_track:
-                    item.setTitle(tmp_track)
+                    item.setTrackNum([tmp_track, None])
                 if tmp_disc != None and tmp_disc != current_disc:
-                    item.setDiscNum(tmp_disc, None)
+                    item.setDiscNum([tmp_disc, None])
                 if tmp_year != None and tmp_year != current_year:
                     try:
                         int(tmp_year)
@@ -408,12 +407,15 @@ class MYTAG(object):
                 if tmp_genre == 'None':
                     tmp_genre = None
                 tmp_track = str(item.getTrackNum()[0])
-                if '/' in tmp_track:
-                    tmp_track = tmp_track.split('/')[0]
-                if len(tmp_track) == 1:
-                    tmp_track = '0' + str(tmp_track)
-                if len(tmp_track) > 2:
-                    tmp_track = tmp_track[:2]
+                if tmp_track == 'None':
+                    tmp_track = None
+                if tmp_track:
+                    if '/' in tmp_track:
+                        tmp_track = tmp_track.split('/')[0]
+                    if len(tmp_track) == 1:
+                        tmp_track = '0' + str(tmp_track)
+                    if len(tmp_track) > 2:
+                        tmp_track = tmp_track[:2]
                 tmp_disc = str(item.getDiscNum()[0])
                 if '/' in tmp_disc:
                     tmp_disc = tmp_disc.split('/')[0]
