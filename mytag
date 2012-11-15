@@ -83,18 +83,8 @@ class WorkerThread(threading.Thread):
                 self.destin = args[2]
             if args[3]:
                 self.destinformat = args[3]
-            #if self.source:
-            #    print 'current folder'
-            #    print self.source
-            #if self.files:
-            #    print 'Folder contents'
-            #    for files in self.files:
-            #        print files
             if self.destin:
-                 #print self.destin
                  self.backupdir = os.path.normpath(self.destin + '/BACKUP/')
-            #if self.destinformat:
-            #     #print self.destinformat
             #threading.Thread.__init__(self)
             self.foldersearch(self.source)
         return
@@ -171,13 +161,13 @@ class WorkerThread(threading.Thread):
         if not os.path.isdir(destindir):
             destindir = os.path.dirname(destindir)
         # Remove empty folders, if any
-        if os.listdir(sourcedir) == []:
-            tmp_dir = sourcedir
-            while os.listdir(tmp_dir) == []:
-                print 'Removed empty dir: ' + tmp_dir
-                os.rmdir(tmp_dir)
-                tmp_dir = os.path.dirname(tmp_dir)
-        else:
+        #if os.listdir(sourcedir) == []:
+        #    tmp_dir = sourcedir
+        #    while os.listdir(tmp_dir) == []:
+        #        print 'Removed empty dir: ' + tmp_dir
+        #        os.rmdir(tmp_dir)
+        #        tmp_dir = os.path.dirname(tmp_dir)
+        if not os.listdir(sourcedir) == []:
             for files in os.listdir(sourcedir):
                 if not os.path.isdir(sourcedir + '/' + files) and not (
                                         destindir == sourcedir):
@@ -188,6 +178,13 @@ class WorkerThread(threading.Thread):
                         mvsrc = sourcedir + '/' + files
                         shutil.move(mvsrc, mvdest)
                         print 'Moved: ' + files
+        # Remove empty folders, if you have moved out the last file.
+        if os.listdir(sourcedir) == []:
+            tmp_dir = sourcedir
+            while os.listdir(tmp_dir) == []:
+                print 'Removed empty dir: ' + tmp_dir
+                os.rmdir(tmp_dir)
+                tmp_dir = os.path.dirname(tmp_dir)
 
     def fill_string(self, files, destin):
             tmp_title = None
