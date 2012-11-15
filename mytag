@@ -49,6 +49,7 @@ MEDIA_TYPES = ['.m4a', '.flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
 YR_SPLIT = ['-', '/', '\\']
 MUSIC_TAGS = ['%artist%', '%albumartist%', '%album%', '%year%',
                  '%title%', '%disc%', '%track%']
+CONFIG = './mytag.conf'
 
 
 class WorkerThread(threading.Thread):
@@ -67,13 +68,189 @@ class WorkerThread(threading.Thread):
 
     def run(self, *args):
         """ run the desired method in the background thread """
-        try:
-            if len(args) == 1:
-                args()
-        except TypeError:
-            pass
-        threading.Thread.__init__(self)
+        print 'workermethod'
+        self.source = None
+        self.files = None
+        self.destin = None
+        self.destinformat = None
+        if args:
+            if args[0]:
+                self.source = args[0]
+            if args[1]:
+                self.files = args[1]
+            if args[2]:
+                self.destin = args[2]
+            if args[3]:
+                self.destinformat = args[3]
+            #if self.source:
+            #    print 'current folder'
+            #    print self.source
+            #if self.files:
+            #    print 'Folder contents'
+            #    for files in self.files:
+            #        print files
+            if self.destin:
+                 #print self.destin
+                 self.backupdir = os.path.normpath(self.destin + '/BACKUP/')
+            #if self.destinformat:
+            #     #print self.destinformat
+            #threading.Thread.__init__(self)
+            self.foldersearch(self.source)
+        return
 
+    def foldersearch(self, folder):
+        """ Start searching the source folder looking for music  """
+        tmpsort = os.listdir(folder)
+        list.sort(tmpsort)
+        for items in tmpsort:
+            path = os.path.normpath(folder + '/' + items)
+            if os.path.isdir(path) and os.listdir(path) == []:
+                currentdir = path
+                while os.listdir(currentdir) == []:
+                    os.rmdir(currentdir)
+                    currentdir = os.path.split(currentdir)[0]
+                    print 'Removed empty directory: ' + currentdir
+                print ''
+            if os.path.isdir(path) and self.backupdir != os.path.dirname(path):
+                self.foldersearch(path)
+            elif os.path.isfile(path) and path[(path.rfind('.')):] in MEDIA_TYPES:
+                self.organisefiles(path)
+        return
+
+    def organisefiles(self, files):
+        """ sort media when found """
+        currentdestin = os.path.normpath(self.destin + '/' + self.destinformat)
+        currentdestin = self.fill_string(files, currentdestin)
+
+        if not files == currentdestin:
+            #if not os.path.isdir(os.path.dirname(currentdestin)):
+            #    os.makedirs(os.path.dirname(currentdestin))
+            #if not os.path.isfile(currentdestin):
+            #    shutil.move(files, currentdestin)
+            #else:
+            #    # create backup files without overwriting copies
+            #    backupdestin = os.path.normpath(self.backupdir + '/' +
+            #                        self.destinformat)
+            #    backup = self.fill_string(files, backupdestin)
+            #    if os.path.isfile(backup) and not files == backup:
+            #        count = 0
+            #        backuptest = backup
+            #        while os.path.isfile(backup):
+            #            backup = backuptest
+            #            count = count + 1
+            #            backup = (backup[:(backuptest.rfind('.'))] +
+            #                        str(count) + backup[(
+            #                        backuptest.rfind('.')):])
+            #    if not os.path.isdir(os.path.dirname(backup)):
+            #        os.makedirs(os.path.dirname(backup))
+            #    if not os.path.isfile(backup):
+            #        shutil.move(files, backup)
+            #    currentdestin = backup
+            self.folder_cleanup(files, currentdestin)
+            print 'IN:   ' + files
+            print 'OUT:  ' + currentdestin
+            print ''
+
+    def folder_cleanup(self, source, destin):
+        """ remove empty folders and move non-media with your media file """
+        sourcedir = os.path.dirname(source)
+        destindir = os.path.dirname(destin)
+        # Remove empty folders, if any
+        if os.listdir(sourcedir) == [] and self.rmdir:
+            currentdir = sourcedir
+            while os.listdir(currentdir) == []:
+                #os.rmdir(currentdir)
+                currentdir = os.path.split(currentdir)[0]
+        else:
+            for files in os.listdir(sourcedir):
+                if not os.path.isdir(sourcedir + '/' + files) and not (
+                                        destindir == sourcedir):
+                    filelist = files[(files.rfind('.')):]
+                    if not filelist in MEDIA_TYPES or os.path.isdir(
+                                    sourcedir + '/' + files):
+                        mvdest = destindir + '/' + os.path.basename(files)
+                        mvsrc = sourcedir + '/' + os.path.basename(files)
+                        #shutil.move(mvsrc, mvdest)
+
+    def fill_string(self, files, destin):
+            tmp_title = None
+            tmp_artist = None
+            tmp_album = None
+            tmp_albumartist = None
+            tmp_genre = None
+            tmp_track = None
+            tmp_disc = None
+            tmp_year = None
+            tmp_comment = None
+            try:
+                item = eyeD3.Tag()
+                item.link(files)
+                item.setVersion(eyeD3.ID3_V2_4)
+                item.setTextEncoding(eyeD3.UTF_8_ENCODING)
+            except:
+                #print 'Tag error: ' + files
+                item = None
+            # pull tag info per item
+            if item:
+                tmp_title = item.getTitle()
+                tmp_artist = item.getArtist('TPE1')
+                if tmp_artist == 'None':
+                    tmp_artist = None
+                tmp_album = item.getAlbum()
+                if tmp_album == 'None':
+                    tmp_album = None
+                tmp_albumartist = item.getArtist('TPE2')
+                if tmp_albumartist == 'None':
+                    tmp_albumartist = None
+                tmp_genre = str(item.getGenre())
+                if ')' in tmp_genre:
+                    tmp_genre = tmp_genre.split(')')[1]
+                if tmp_genre == 'None':
+                    tmp_genre = None
+                tmp_track = str(item.getTrackNum()[0])
+                if tmp_track == 'None':
+                    tmp_track = None
+                if tmp_track:
+                    if '/' in tmp_track:
+                        tmp_track = tmp_track.split('/')[0]
+                    if len(tmp_track) == 1:
+                        tmp_track = '0' + str(tmp_track)
+                    if len(tmp_track) > 2:
+                        tmp_track = tmp_track[:2]
+                tmp_disc = str(item.getDiscNum()[0])
+                if '/' in tmp_disc:
+                    tmp_disc = tmp_disc.split('/')[0]
+                if len(tmp_disc) == 2:
+                    tmp_disc = tmp_disc[-1]
+                tmp_year = item.getYear()
+                if tmp_year == 'None':
+                    tmp_year = None
+                tmp_comment = item.getComment()
+                if tmp_comment == 'None':
+                    tmp_comment = None
+                # replace temp strings with actual tags
+                if tmp_title:
+                    destin = destin.replace('%title%', tmp_title)
+                if tmp_albumartist:
+                    destin = destin.replace('%albumartist%', tmp_albumartist)
+                else:
+                    destin = destin.replace('%albumartist%', '%artist%')
+                if tmp_artist:
+                    destin = destin.replace('%artist%', tmp_artist)
+                if tmp_album:
+                    destin = destin.replace('%album%', tmp_album)
+                if tmp_genre:
+                    destin = destin.replace('%genre%', tmp_genre)
+                if tmp_track:
+                    destin = destin.replace('%track%', tmp_track)
+                if tmp_disc:
+                    destin = destin.replace('%disc%', tmp_disc)
+                if tmp_year:
+                    destin = destin.replace('%year%', tmp_year)
+                if tmp_comment:
+                    destin = destin.replace('%comment%', tmp_comment)
+            return destin
+                
 
 class MYTAG(object):
     """ browse folders and set set using ui """
@@ -89,7 +266,7 @@ class MYTAG(object):
             self.worker = WorkerThread(self)
         # get config info
         self.conf = ConfigParser.RawConfigParser()
-        self.conf.read('./mytag.conf')
+        self.conf.read(CONFIG)
         self.homefolder = self.conf.get('conf', 'home')
         self.library = self.conf.get('conf', 'defaultlibrary')
         self.libraryformat = self.conf.get('conf', 'outputstyle')
@@ -103,6 +280,7 @@ class MYTAG(object):
         self.backbutton = self.builder.get_object("backbutton")
         self.homebutton = self.builder.get_object("homebutton")
         self.gobutton = self.builder.get_object("gobutton")
+        self.organisebutton = self.builder.get_object('organisebutton')
         self.folderlist = self.builder.get_object('folderstore')
         self.foldertree = self.builder.get_object('folderview')
         self.folderview = self.builder.get_object("folderview")
@@ -163,6 +341,7 @@ class MYTAG(object):
         self.backbutton.connect("clicked", self.goback)
         self.homebutton.connect("clicked", self.gohome)
         self.gobutton.connect("clicked", self.savetags)
+        self.organisebutton.connect("clicked", self.organisefolder)
         # config window actions
         self.applybutton.connect("clicked", self.saveconf)
         self.closebutton.connect("clicked", self.closeconf)
@@ -213,10 +392,6 @@ class MYTAG(object):
 
     def showconfig(self, *args):
         """ fill and show the config window """
-        self.conf.read('./mytag.conf')
-        self.homefolder = self.conf.get('conf', 'home')
-        self.library = self.conf.get('conf', 'defaultlibrary')
-        self.libraryformat = self.conf.get('conf', 'outputstyle')
         self.homeentry.set_text(self.homefolder)
         self.libraryentry.set_text(self.library)
         self.styleentry.set_text(self.libraryformat)
@@ -224,9 +399,18 @@ class MYTAG(object):
 
     def saveconf(self, *args):
         """ save any config changes """
+        self.conf.read(CONFIG)
         self.conf.set('conf', 'home', self.homeentry.get_text())
         self.conf.set('conf', 'defaultlibrary', self.libraryentry.get_text())
         self.conf.set('conf', 'outputstyle', self.styleentry.get_text())
+        self.homefolder = self.homeentry.get_text()
+        self.library = self.libraryentry.get_text()
+        self.libraryformat = self.styleentry.get_text()
+        FILE = open(CONFIG, "w")
+        self.conf.write(FILE)
+        FILE.close()
+        self.showconfig()
+
 
     def closeconf(self, *args):
         """ hide the config window """
@@ -240,14 +424,11 @@ class MYTAG(object):
         Gtk.main_quit(*args)
         return False
 
-    #def workermethods(self, *args):
-    #    """ used to send multiple methods to the workerthread... """
-    #    for items in args:
-    #        if items.get_tooltip_text() == 'Reload the folder list':
-    #            self.worker.run(self.test())
-    #        if items.get_tooltip_text() == 'Edit the selected files':
-    #            self.worker.run(self.test2())
-    #    return True
+    def organisefolder(self, *args):
+        """ send organise to the workerthread... """
+        self.worker.run(self.current_dir, self.filelist, self.library,
+                        self.libraryformat)
+        return True
 
     def savetags(self, *args):
         """ update the loaded files with new tags """
