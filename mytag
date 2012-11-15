@@ -23,6 +23,7 @@
 """
 
 import os
+import shutil
 import threading
 import ConfigParser
 import sys
@@ -45,7 +46,7 @@ except ImportError:
     TAG_SUPPORT = False
 
 
-MEDIA_TYPES = ['.m4a', '.flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
+MEDIA_TYPES = ['.m4a', 'flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
 YR_SPLIT = ['-', '/', '\\']
 MUSIC_TAGS = ['%artist%', '%albumartist%', '%album%', '%year%',
                  '%title%', '%disc%', '%track%']
@@ -100,67 +101,82 @@ class WorkerThread(threading.Thread):
 
     def foldersearch(self, folder):
         """ Start searching the source folder looking for music  """
-        tmpsort = os.listdir(folder)
-        list.sort(tmpsort)
+        try:
+            tmpsort = os.listdir(folder)
+            list.sort(tmpsort)
+        except OSError:
+            return False
         for items in tmpsort:
-            path = os.path.normpath(folder + '/' + items)
+            try:
+                path = os.path.normpath((folder).decode('utf-8') + u'/' + (items).decode('utf-8'))
+            except:
+                path = os.path.normpath(folder + '/' + items)
             if os.path.isdir(path) and os.listdir(path) == []:
-                currentdir = path
-                while os.listdir(currentdir) == []:
-                    os.rmdir(currentdir)
-                    currentdir = os.path.split(currentdir)[0]
-                    print 'Removed empty directory: ' + currentdir
+                tmp_dir = path
+                while os.listdir(tmp_dir) == []:
+                    os.rmdir(tmp_dir)
+                    tmp_dir = os.path.split(tmp_dir)[0]
+                    print 'Removed empty directory: ' + tmp_dir
                 print ''
             if os.path.isdir(path) and self.backupdir != os.path.dirname(path):
-                self.foldersearch(path)
+                if os.path.basename(path) == '.mediaartlocal':
+                    print 'removing .mediaartlocal folder'
+                    for items in os.listdir(path):
+                        os.remove(os.path.join(path + u'/' + items))
+                    os.rmdir(path)
+                else:
+                    self.foldersearch(path)
             elif os.path.isfile(path) and path[(path.rfind('.')):] in MEDIA_TYPES:
                 self.organisefiles(path)
         return
 
     def organisefiles(self, files):
         """ sort media when found """
-        currentdestin = os.path.normpath(self.destin + '/' + self.destinformat)
+        currentdestin = os.path.normpath(self.destin + u'/' + self.destinformat)
         currentdestin = self.fill_string(files, currentdestin)
-
         if not files == currentdestin:
-            #if not os.path.isdir(os.path.dirname(currentdestin)):
-            #    os.makedirs(os.path.dirname(currentdestin))
-            #if not os.path.isfile(currentdestin):
-            #    shutil.move(files, currentdestin)
-            #else:
-            #    # create backup files without overwriting copies
-            #    backupdestin = os.path.normpath(self.backupdir + '/' +
-            #                        self.destinformat)
-            #    backup = self.fill_string(files, backupdestin)
-            #    if os.path.isfile(backup) and not files == backup:
-            #        count = 0
-            #        backuptest = backup
-            #        while os.path.isfile(backup):
-            #            backup = backuptest
-            #            count = count + 1
-            #            backup = (backup[:(backuptest.rfind('.'))] +
-            #                        str(count) + backup[(
-            #                        backuptest.rfind('.')):])
-            #    if not os.path.isdir(os.path.dirname(backup)):
-            #        os.makedirs(os.path.dirname(backup))
-            #    if not os.path.isfile(backup):
-            #        shutil.move(files, backup)
-            #    currentdestin = backup
+            if not os.path.isdir(os.path.dirname(currentdestin)):
+                os.makedirs(os.path.dirname(currentdestin))
+            if not os.path.isfile(currentdestin):
+                shutil.move(files, currentdestin)
+            else:
+                # create backup files without overwriting copies
+                backupdestin = os.path.normpath(self.backupdir + '/' +
+                                    self.destinformat)
+                backup = self.fill_string(files, backupdestin)
+                if os.path.isfile(backup) and not files == backup:
+                    count = 0
+                    backuptest = backup
+                    while os.path.isfile(backup):
+                        backup = backuptest
+                        count = count + 1
+                        backup = (backup[:(backuptest.rfind('.'))] +
+                                    str(count) + backup[(
+                                    backuptest.rfind('.')):])
+                if not os.path.isdir(os.path.dirname(backup)):
+                    os.makedirs(os.path.dirname(backup))
+                if not os.path.isfile(backup):
+                    shutil.move(files, backup)
+                currentdestin = backup
+                self.destin = currentdestin
             self.folder_cleanup(files, currentdestin)
             print 'IN:   ' + files
             print 'OUT:  ' + currentdestin
             print ''
 
-    def folder_cleanup(self, source, destin):
+    def folder_cleanup(self, sourcedir, destindir):
         """ remove empty folders and move non-media with your media file """
-        sourcedir = os.path.dirname(source)
-        destindir = os.path.dirname(destin)
+        if not os.path.isdir(sourcedir):
+            sourcedir = os.path.dirname(sourcedir)
+        if not os.path.isdir(destindir):
+            destindir = os.path.dirname(destindir)
         # Remove empty folders, if any
-        if os.listdir(sourcedir) == [] and self.rmdir:
-            currentdir = sourcedir
-            while os.listdir(currentdir) == []:
-                #os.rmdir(currentdir)
-                currentdir = os.path.split(currentdir)[0]
+        if os.listdir(sourcedir) == []:
+            tmp_dir = sourcedir
+            while os.listdir(tmp_dir) == []:
+                print 'Removed empty dir: ' + tmp_dir
+                os.rmdir(tmp_dir)
+                tmp_dir = os.path.dirname(tmp_dir)
         else:
             for files in os.listdir(sourcedir):
                 if not os.path.isdir(sourcedir + '/' + files) and not (
@@ -168,9 +184,10 @@ class WorkerThread(threading.Thread):
                     filelist = files[(files.rfind('.')):]
                     if not filelist in MEDIA_TYPES or os.path.isdir(
                                     sourcedir + '/' + files):
-                        mvdest = destindir + '/' + os.path.basename(files)
-                        mvsrc = sourcedir + '/' + os.path.basename(files)
-                        #shutil.move(mvsrc, mvdest)
+                        mvdest = destindir + '/' + files
+                        mvsrc = sourcedir + '/' + files
+                        shutil.move(mvsrc, mvdest)
+                        print 'Moved: ' + files
 
     def fill_string(self, files, destin):
             tmp_title = None
@@ -193,16 +210,26 @@ class WorkerThread(threading.Thread):
             # pull tag info per item
             if item:
                 tmp_title = item.getTitle()
+                if tmp_title == 'None':
+                    tmp_title = None
+                if tmp_title:
+                    tmp_title = tmp_title.replace('/', '_')
                 tmp_artist = item.getArtist('TPE1')
                 if tmp_artist == 'None':
                     tmp_artist = None
+                if tmp_artist:
+                    tmp_artist = tmp_artist.replace('/', '_')
                 tmp_album = item.getAlbum()
                 if tmp_album == 'None':
                     tmp_album = None
+                if tmp_album:
+                    tmp_album = tmp_album.replace('/', '_')
                 tmp_albumartist = item.getArtist('TPE2')
                 if tmp_albumartist == 'None':
                     tmp_albumartist = None
-                tmp_genre = str(item.getGenre())
+                if tmp_albumartist:
+                    tmp_albumartist = tmp_albumartist.replace('/', '_')
+                tmp_genre = str(item.getGenre()).replace('/', '_')
                 if ')' in tmp_genre:
                     tmp_genre = tmp_genre.split(')')[1]
                 if tmp_genre == 'None':
@@ -228,6 +255,8 @@ class WorkerThread(threading.Thread):
                 tmp_comment = item.getComment()
                 if tmp_comment == 'None':
                     tmp_comment = None
+                if tmp_comment:
+                    tmp_comment = tmp_comment.replace('/', '_')
                 # replace temp strings with actual tags
                 if tmp_title:
                     destin = destin.replace('%title%', tmp_title)
@@ -249,6 +278,7 @@ class WorkerThread(threading.Thread):
                     destin = destin.replace('%year%', tmp_year)
                 if tmp_comment:
                     destin = destin.replace('%comment%', tmp_comment)
+            destin = destin + files[(files.rfind('.')):]
             return destin
                 
 
@@ -357,6 +387,8 @@ class MYTAG(object):
         self.contenttree.append_column(filecolumn)
         self.contenttree.set_model(self.contentlist)
         # list default dir
+        if not os.path.isdir(self.homefolder):
+            os.makedirs(self.homefolder)
         self.listfolder(self.current_dir)
 
     def run(self):
@@ -426,8 +458,9 @@ class MYTAG(object):
 
     def organisefolder(self, *args):
         """ send organise to the workerthread... """
-        self.worker.run(self.current_dir, self.filelist, self.library,
-                        self.libraryformat)
+        if not self.worker.run(self.current_dir, self.filelist, self.library,
+                               self.libraryformat):
+            self.gohome()
         return True
 
     def savetags(self, *args):
@@ -708,8 +741,11 @@ class MYTAG(object):
     def listfiles(self, *args):
         """ function to fill the file list column """
         self.current_files = []
-        files_dir = os.listdir(self.current_dir)
-        files_dir.sort()
+        try:
+            files_dir = os.listdir(self.current_dir)
+            files_dir.sort()
+        except OSError:
+            self.gohome() 
         # clear list if we have scanned before
         for items in self.contentlist:
             self.contentlist.remove(items.iter)
@@ -719,7 +755,7 @@ class MYTAG(object):
         # search the supplied directory for items
         for items in files_dir:
             test_file = os.path.isfile(self.current_dir + '/' + items)
-            test_ext = items[(items.rfind('.')):] in MEDIA_TYPES
+            test_ext = items[-4:] in MEDIA_TYPES
             if not items[0] == '.' and test_file and test_ext:
                 self.contentlist.append([items])
         return
