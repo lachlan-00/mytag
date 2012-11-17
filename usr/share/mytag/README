@@ -24,7 +24,7 @@ Supported output variables:
 %track% - Track number
 
 *NOTE: %albumartist% will fall back to artist when not available.
-       This has been the best way i've found to manage multiple
+       This has been the best way I've found to manage multiple
        artist CD's/
 
 Organisation example:

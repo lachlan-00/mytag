@@ -28,11 +28,10 @@ import threading
 import ConfigParser
 import sys
 
-#from multiprocessing import Process
-#from threading import Thread
-
 from gi.repository import Gtk
 from gi.repository import Gdk
+
+from xdg.BaseDirectory import *
 
 # quit if using python3
 if sys.version[0] == 3:
@@ -50,7 +49,7 @@ MEDIA_TYPES = ['.m4a', 'flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
 YR_SPLIT = ['-', '/', '\\']
 MUSIC_TAGS = ['%artist%', '%albumartist%', '%album%', '%year%',
                  '%title%', '%disc%', '%track%']
-CONFIG = './mytag.conf'
+CONFIG = xdg_config_dirs[0] + '/mytag.conf'
 
 
 class WorkerThread(threading.Thread):
@@ -125,16 +124,18 @@ class WorkerThread(threading.Thread):
         """ sort media when found """
         currentdestin = os.path.normpath(self.destin + u'/' + self.destinformat)
         currentdestin = self.fill_string(files, currentdestin)
+        stringtest = False
+        for tags in MUSIC_TAGS:
+            if tags in currentdestin:
+                #print 'Tag missing: ' + tags
+                stringtest = True
+                self.returntext = [tags, os.path.dirname(files)]
+                return False
         if not files == currentdestin:
             if not os.path.isdir(os.path.dirname(currentdestin)):
-                os.makedirs(os.path.dirname(currentdestin))
+                if not stringtest:
+                    os.makedirs(os.path.dirname(currentdestin))
             if not os.path.isfile(currentdestin):
-                stringtest = False
-                for tags in MUSIC_TAGS:
-                    if tags in currentdestin:
-                        #print 'Tag missing: ' + tags
-                        stringtest = True
-                        self.returntext = [tags, files]
                 if not stringtest:
                     shutil.move(files, currentdestin)
             else:
@@ -151,12 +152,6 @@ class WorkerThread(threading.Thread):
                         backup = (backup[:(backuptest.rfind('.'))] +
                                     str(count) + backup[(
                                     backuptest.rfind('.')):])
-                stringtest = False
-                for tags in MUSIC_TAGS:
-                    if tags in backup:
-                        #print 'Tag missing: ' + tags
-                        stringtest = True
-                        self.returntext = [tags, files]
                 if not stringtest:
                     if not os.path.isdir(os.path.dirname(backup)):
                         os.makedirs(os.path.dirname(backup))
@@ -298,12 +293,13 @@ class MYTAG(object):
         if not TAG_SUPPORT:
             raise Exception('Please install python-eyed3')
         self.builder = Gtk.Builder()
-        self.builder.add_from_file("main.ui")
+        self.builder.add_from_file("/usr/share/mytag/main.ui")
         self.builder.connect_signals(self)
         self.worker = None
         if not self.worker:
             self.worker = WorkerThread(self)
         # get config info
+        self.checkconfig()
         self.conf = ConfigParser.RawConfigParser()
         self.conf.read(CONFIG)
         self.homefolder = self.conf.get('conf', 'home')
@@ -406,7 +402,7 @@ class MYTAG(object):
         # list default dir
         if not os.path.isdir(self.homefolder):
             os.makedirs(self.homefolder)
-        self.listfolder(self.current_dir)
+        self.listfolder(self.homefolder)
 
     def run(self):
         """ show the main window and start the main GTK loop """
@@ -458,8 +454,14 @@ class MYTAG(object):
         FILE = open(CONFIG, "w")
         self.conf.write(FILE)
         FILE.close()
-        self.showconfig()
 
+    def checkconfig(self):
+        if not os.path.isfile(CONFIG):
+            FILE = open(CONFIG, "w")
+            FILE.write("[conf]\nhome = " + os.getenv('HOME') +
+                       "\ndefaultlibrary = " + os.getenv('HOME') +
+                       "\noutputstyle = %albumartist%/(%year%) %album%/%disc%%track% - %title%)")
+            FILE.close()
 
     def closeconf(self, *args):
         """ hide the config window """
