@@ -128,7 +128,13 @@ class WorkerThread(threading.Thread):
             if not os.path.isdir(os.path.dirname(currentdestin)):
                 os.makedirs(os.path.dirname(currentdestin))
             if not os.path.isfile(currentdestin):
-                shutil.move(files, currentdestin)
+                stringtest = False
+                for tags in MUSIC_TAGS:
+                    if tags in currentdestin:
+                        print 'Tag missing: ' + tags
+                        stringtest = True
+                if not stringtest:
+                    shutil.move(files, currentdestin)
             else:
                 # create backup files without overwriting copies
                 backupdestin = os.path.normpath(self.backupdir + '/' +
@@ -143,16 +149,23 @@ class WorkerThread(threading.Thread):
                         backup = (backup[:(backuptest.rfind('.'))] +
                                     str(count) + backup[(
                                     backuptest.rfind('.')):])
-                if not os.path.isdir(os.path.dirname(backup)):
-                    os.makedirs(os.path.dirname(backup))
-                if not os.path.isfile(backup):
-                    shutil.move(files, backup)
+                stringtest = False
+                for tags in MUSIC_TAGS:
+                    if tags in backup:
+                        print 'Tag missing: ' + tags
+                        stringtest = True
+                if not stringtest:
+                    if not os.path.isdir(os.path.dirname(backup)):
+                        os.makedirs(os.path.dirname(backup))
+                    if not os.path.isfile(backup):
+                        shutil.move(files, backup)
                 currentdestin = backup
                 self.destin = currentdestin
-            self.folder_cleanup(files, currentdestin)
-            print 'IN:   ' + files
-            print 'OUT:  ' + currentdestin
-            print ''
+            if not stringtest:
+                self.folder_cleanup(files, currentdestin)
+                print 'IN:   ' + files
+                print 'OUT:  ' + currentdestin
+                print ''
 
     def folder_cleanup(self, sourcedir, destindir):
         """ remove empty folders and move non-media with your media file """
@@ -455,9 +468,13 @@ class MYTAG(object):
 
     def organisefolder(self, *args):
         """ send organise to the workerthread... """
-        if not self.worker.run(self.current_dir, self.filelist, self.library,
-                               self.libraryformat):
+        self.worker.run(self.current_dir, self.filelist, self.library,
+                               self.libraryformat)
+        if not os.path.isdir(self.current_dir):
+            print self.currentfolder
+            print 'going home'
             self.gohome()
+        self.listfolder(self.current_dir)
         return True
 
     def savetags(self, *args):
