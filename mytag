@@ -70,6 +70,7 @@ class WorkerThread(threading.Thread):
     def run(self, *args):
         """ run the desired method in the background thread """
         print 'workermethod'
+        self.returntext = True
         self.source = None
         self.files = None
         self.destin = None
@@ -87,7 +88,7 @@ class WorkerThread(threading.Thread):
                  self.backupdir = os.path.normpath(self.destin + '/BACKUP/')
             #threading.Thread.__init__(self)
             self.foldersearch(self.source)
-        return
+        return self.returntext
 
     def foldersearch(self, folder):
         """ Start searching the source folder looking for music  """
@@ -131,8 +132,9 @@ class WorkerThread(threading.Thread):
                 stringtest = False
                 for tags in MUSIC_TAGS:
                     if tags in currentdestin:
-                        print 'Tag missing: ' + tags
+                        #print 'Tag missing: ' + tags
                         stringtest = True
+                        self.returntext = [tags, files]
                 if not stringtest:
                     shutil.move(files, currentdestin)
             else:
@@ -152,8 +154,9 @@ class WorkerThread(threading.Thread):
                 stringtest = False
                 for tags in MUSIC_TAGS:
                     if tags in backup:
-                        print 'Tag missing: ' + tags
+                        #print 'Tag missing: ' + tags
                         stringtest = True
+                        self.returntext = [tags, files]
                 if not stringtest:
                     if not os.path.isdir(os.path.dirname(backup)):
                         os.makedirs(os.path.dirname(backup))
@@ -166,6 +169,7 @@ class WorkerThread(threading.Thread):
                 print 'IN:   ' + files
                 print 'OUT:  ' + currentdestin
                 print ''
+        return
 
     def folder_cleanup(self, sourcedir, destindir):
         """ remove empty folders and move non-media with your media file """
@@ -173,15 +177,10 @@ class WorkerThread(threading.Thread):
             sourcedir = os.path.dirname(sourcedir)
         if not os.path.isdir(destindir):
             destindir = os.path.dirname(destindir)
-        # Remove empty folders, if any
-        #if os.listdir(sourcedir) == []:
-        #    tmp_dir = sourcedir
-        #    while os.listdir(tmp_dir) == []:
-        #        print 'Removed empty dir: ' + tmp_dir
-        #        os.rmdir(tmp_dir)
-        #        tmp_dir = os.path.dirname(tmp_dir)
         if not os.listdir(sourcedir) == []:
-            for files in os.listdir(sourcedir):
+            tmp_dir = os.listdir(sourcedir)
+            tmp_dir.sort()
+            for files in tmp_dir:
                 if not os.path.isdir(sourcedir + '/' + files) and not (
                                         destindir == sourcedir):
                     filelist = files[(files.rfind('.')):]
@@ -354,6 +353,11 @@ class MYTAG(object):
         self.homeentry = self.builder.get_object('homeentry')
         self.applybutton = self.builder.get_object("applyconf")
         self.closebutton = self.builder.get_object("closeconf")
+        # load popup window items
+        self.popwindow = self.builder.get_object("popup_window")
+        self.popbutton = self.builder.get_object("closepop")
+        self.successwindow = self.builder.get_object("success_window")
+        self.successbutton = self.builder.get_object("closesuccess")
         # set tag items
         self.title = None
         self.artist = None
@@ -385,6 +389,9 @@ class MYTAG(object):
         # config window actions
         self.applybutton.connect("clicked", self.saveconf)
         self.closebutton.connect("clicked", self.closeconf)
+        # popup window actions
+        self.popbutton.connect("clicked", self.closepop)
+        self.successbutton.connect("clicked", self.closesuccess)
         cell = Gtk.CellRendererText()
         foldercolumn = Gtk.TreeViewColumn("Select Folder:", cell, text=0)
         filecolumn = Gtk.TreeViewColumn("Select Files", cell, text=0)
@@ -458,6 +465,14 @@ class MYTAG(object):
         """ hide the config window """
         self.confwindow.hide()
 
+    def closepop(self, *args):
+        """ hide the config window """
+        self.popwindow.hide()
+
+    def closesuccess(self, *args):
+        """ hide the config window """
+        self.successwindow.hide()
+
     def quit(self, *args):
         """ stop the process thread and close the program"""
         self.worker._Thread__stop()
@@ -468,13 +483,22 @@ class MYTAG(object):
 
     def organisefolder(self, *args):
         """ send organise to the workerthread... """
-        self.worker.run(self.current_dir, self.filelist, self.library,
-                               self.libraryformat)
+        returnstring = self.worker.run(self.current_dir, self.filelist,
+                                       self.library, self.libraryformat)
+        if type(returnstring) == type([]):
+            self.popwindow.set_markup('Error: ' + returnstring[0] +
+                                      ' missing')
+            self.popwindow.format_secondary_text(returnstring[1])
+            self.popwindow.show()
+            print 'Error: ' + returnstring + ' tag was missing!'
+        else:
+            self.successwindow.show()
         if not os.path.isdir(self.current_dir):
             print self.currentfolder
             print 'going home'
             self.gohome()
-        self.listfolder(self.current_dir)
+        else:
+            self.listfolder(self.current_dir)
         return True
 
     def savetags(self, *args):
