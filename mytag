@@ -83,7 +83,7 @@ class WorkerThread(threading.Thread):
             if args[2]:
                 self.destin = args[2]
             if args[3]:
-                self.destinformat = args[3]
+                self.destinformat = args[3].lower()
             if self.destin:
                  self.backupdir = os.path.normpath(self.destin + '/BACKUP/')
             #threading.Thread.__init__(self)
