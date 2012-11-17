@@ -1,1 +1,47 @@
-/home/user/workspace/mytag/usr/share/mytag/README
+mytag: Python tag editor
+
+Why:
+tagtool sucks so I'm making a GTK3 ID3v2.4 compatible replacement.
+
+News:
+ * Feature complete!
+
+About:
+This is a program to bring all the requirements of managing music files together into one program.
+I have written a lot of music and file organisation programs for myself and the major software in this area just doesn't fit my needs.
+
+Features other taggers don't have:
+ * Fast and simple file tagging process
+ * set tags and organise files according to their tag in a fast and easy way.
+
+Supported output variables:
+%title% - Track title
+%artist% - Track artist
+%albumartist% - Album artist
+%album% - Album title
+%year% - Album release year
+%disc% - Disc number
+%track% - Track number
+
+*NOTE: %albumartist% will fall back to artist when not available.
+       This has been the best way I've found to manage multiple
+       artist CD's/
+
+Organisation example:
+ * Output Style: %albumartist%/%year% %album%/%disc%-%track% - %title%
+ * Input: /music/new/spawn soundtrack/01 - filter & the crystal method - trip like i do.mp3
+ * Set Album Artist to 'Various'.
+ * Output: /music/Various/1997 Spawn/1-01 - Can't You (Trip Like I Do).mp3
+
+
+These extra features highlight how much tagging programs are missing when you are editing.
+Just because you're editing tags doesn't mean that your files are corect either!
+
+Requires:
+ * python 2.7
+ * python-eyed3
+ * gnome-icon-theme
+
+
+Links:
+* https://github.com/lachlan-00/mytag
