@@ -27,6 +27,7 @@ import shutil
 import threading
 import ConfigParser
 import sys
+import mimetypes
 
 from gi.repository import Gtk
 from gi.repository import Gdk
@@ -46,6 +47,7 @@ except ImportError:
 
 
 MEDIA_TYPES = ['.m4a', 'flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
+MIME_TYPES = ['audio/x-wav','audio/flac','audio/ogg','audio/mpeg']
 YR_SPLIT = ['-', '/', '\\']
 MUSIC_TAGS = ['%artist%', '%albumartist%', '%album%', '%year%',
                  '%title%', '%disc%', '%track%']
@@ -117,6 +119,7 @@ class WorkerThread(threading.Thread):
                 else:
                     self.foldersearch(path)
             elif os.path.isfile(path) and path[(path.rfind('.')):] in MEDIA_TYPES:
+                #mimetypes.guess_type(path)[0] in MIME_TYPES
                 self.organisefiles(path)
         return
 
@@ -492,15 +495,15 @@ class MYTAG(object):
                                       ' missing')
             self.popwindow.format_secondary_text(returnstring[1])
             self.popwindow.show()
+            self.listfolder(self.current_dir)
             print 'Error: ' + returnstring + ' tag was missing!'
         else:
             self.successwindow.show()
-        if not os.path.isdir(self.current_dir):
-            print self.currentfolder
-            print 'going home'
-            self.gohome()
-        else:
-            self.listfolder(self.current_dir)
+            if not os.path.isdir(self.current_dir):
+                print 'going home'
+                self.gohome()
+            else:
+                self.listfolder(self.current_dir)
         return True
 
     def savetags(self, *args):
