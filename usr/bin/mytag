@@ -136,6 +136,7 @@ class WorkerThread(threading.Thread):
                 stringtest = True
                 self.returntext = [tags, os.path.dirname(files)]
                 return False
+
         if not files == currentdestin:
             if os.path.isfile(currentdestin):
                 # create backup files without overwriting copies
@@ -497,7 +498,7 @@ class MYTAG(object):
             self.popwindow.format_secondary_text(returnstring[1])
             self.popwindow.show()
             self.listfolder(self.current_dir)
-            print 'Error: ' + returnstring + ' tag was missing!'
+            print 'Error: ' + returnstring[0] + ' tag was missing!'
         else:
             self.successwindow.show()
             if not os.path.isdir(self.current_dir):
