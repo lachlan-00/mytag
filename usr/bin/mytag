@@ -125,8 +125,10 @@ class WorkerThread(threading.Thread):
 
     def organisefiles(self, files):
         """ sort media when found """
+        print 'start'
         currentdestin = os.path.normpath(self.destin + u'/' + self.destinformat)
         currentdestin = self.fill_string(files, currentdestin)
+        destin_dir = os.path.dirname(currentdestin)
         stringtest = False
         for tags in MUSIC_TAGS:
             if tags in currentdestin:
@@ -135,34 +137,33 @@ class WorkerThread(threading.Thread):
                 self.returntext = [tags, os.path.dirname(files)]
                 return False
         if not files == currentdestin:
-            if not os.path.isdir(os.path.dirname(currentdestin)):
-                if not stringtest:
-                    os.makedirs(os.path.dirname(currentdestin))
-            if not os.path.isfile(currentdestin):
-                if not stringtest:
-                    shutil.move(files, currentdestin)
-            else:
+            if os.path.isfile(currentdestin):
                 # create backup files without overwriting copies
                 backupdestin = os.path.normpath(self.backupdir + '/' +
                                     self.destinformat)
                 backup = self.fill_string(files, backupdestin)
                 if os.path.isfile(backup) and not files == backup:
                     count = 0
-                    backuptest = backup
+                    tmp_path = backup
+                    tmp_dir = os.path.dirname(tmp_path)
                     while os.path.isfile(backup):
-                        backup = backuptest
+                        backup = tmp_path
+                        backup = (tmp_path[:(tmp_path.rfind('.'))] +
+                                    str(count) + tmp_path[(
+                                    tmp_path.rfind('.')):])
                         count = count + 1
-                        backup = (backup[:(backuptest.rfind('.'))] +
-                                    str(count) + backup[(
-                                    backuptest.rfind('.')):])
-                if not stringtest:
-                    if not os.path.isdir(os.path.dirname(backup)):
-                        os.makedirs(os.path.dirname(backup))
-                    if not os.path.isfile(backup):
-                        shutil.move(files, backup)
+                    destin_dir = os.path.dirname(backup)
+                #if not stringtest:
+                #    if not os.path.isfile(backup):
+                #        if not os.path.isdir(os.path.dirname(backup)):
+                #            os.makedirs(os.path.dirname(backup))
+                #        shutil.move(files, backup)
                 currentdestin = backup
-                self.destin = currentdestin
-            if not stringtest:
+                print destin_dir
+            if not os.path.isfile(currentdestin) and not stringtest:
+                if not os.path.isdir(destin_dir):
+                    os.makedirs(destin_dir)
+                shutil.move(files, currentdestin)
                 self.folder_cleanup(files, currentdestin)
                 print 'IN:   ' + files
                 print 'OUT:  ' + currentdestin
