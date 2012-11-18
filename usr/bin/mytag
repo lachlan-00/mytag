@@ -100,9 +100,10 @@ class WorkerThread(threading.Thread):
             return False
         for items in tmpsort:
             try:
-                path = os.path.normpath((folder).decode('utf-8') + u'/' + (items).decode('utf-8'))
-            except:
                 path = os.path.normpath(folder + '/' + items)
+            except:
+                path = os.path.normpath((folder).decode('utf-8') + u'/' + (items).decode('utf-8'))
+
             if os.path.isdir(path) and os.listdir(path) == []:
                 tmp_dir = path
                 while os.listdir(tmp_dir) == []:
@@ -160,10 +161,11 @@ class WorkerThread(threading.Thread):
                 #            os.makedirs(os.path.dirname(backup))
                 #        shutil.move(files, backup)
                 currentdestin = backup
-                print destin_dir
             if not os.path.isfile(currentdestin) and not stringtest:
-                if not os.path.isdir(destin_dir):
-                    os.makedirs(destin_dir)
+                if not os.path.isdir(os.path.dirname(currentdestin)):
+                    os.makedirs(os.path.dirname(currentdestin))
+                print files
+                print currentdestin
                 shutil.move(files, currentdestin)
                 self.folder_cleanup(files, currentdestin)
                 print 'IN:   ' + files
