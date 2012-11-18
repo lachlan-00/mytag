@@ -27,12 +27,12 @@ import shutil
 import threading
 import ConfigParser
 import sys
-import mimetypes
+#import mimetypes
 
 from gi.repository import Gtk
 from gi.repository import Gdk
 
-from xdg.BaseDirectory import *
+from xdg.BaseDirectory import xdg_config_dirs
 
 # quit if using python3
 if sys.version[0] == 3:
@@ -47,7 +47,7 @@ except ImportError:
 
 
 MEDIA_TYPES = ['.m4a', 'flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
-MIME_TYPES = ['audio/x-wav','audio/flac','audio/ogg','audio/mpeg']
+MIME_TYPES = ['audio/x-wav', 'audio/flac', 'audio/ogg', 'audio/mpeg']
 YR_SPLIT = ['-', '/', '\\']
 MUSIC_TAGS = ['%artist%', '%albumartist%', '%album%', '%year%',
                  '%title%', '%disc%', '%track%']
@@ -63,6 +63,13 @@ class WorkerThread(threading.Thread):
         self._want_abort = 0
         self._stop = threading.Event()
         self.setDaemon(True)
+        self.returntext = True
+        self.source = None
+        self.files = None
+        self.destin = None
+        self.destinformat = None
+        self.backupdir = None
+        self.stop = None
         # This starts the thread running on creation, but you could
         # also make the GUI thread responsible for calling this
         self.start()
@@ -86,42 +93,47 @@ class WorkerThread(threading.Thread):
             if args[3]:
                 self.destinformat = args[3].lower()
             if self.destin:
-                 self.backupdir = os.path.normpath(self.destin + '/BACKUP/')
+                self.backupdir = os.path.normpath(self.destin + '/BACKUP/')
             #threading.Thread.__init__(self)
             self.foldersearch(self.source)
         return self.returntext
 
     def foldersearch(self, folder):
         """ Start searching the source folder looking for music  """
+        self.stop = False
         try:
             tmpsort = os.listdir(folder)
             list.sort(tmpsort)
         except OSError:
             return False
         for items in tmpsort:
-            try:
-                path = os.path.normpath(folder + '/' + items)
-            except:
-                path = os.path.normpath((folder).decode('utf-8') + u'/' + (items).decode('utf-8'))
+            if not self.stop:
+                try:
+                    path = os.path.normpath(folder + '/' + items)
+                except:
+                    path = os.path.normpath((folder).decode('utf-8') + u'/' +
+                                            (items).decode('utf-8'))
 
-            if os.path.isdir(path) and os.listdir(path) == []:
-                tmp_dir = path
-                while os.listdir(tmp_dir) == []:
-                    os.rmdir(tmp_dir)
-                    tmp_dir = os.path.split(tmp_dir)[0]
-                    print 'Removed empty directory: ' + tmp_dir
-                print ''
-            if os.path.isdir(path) and self.backupdir != os.path.dirname(path):
-                if os.path.basename(path) == '.mediaartlocal':
-                    print 'removing .mediaartlocal folder'
-                    for items in os.listdir(path):
-                        os.remove(os.path.join(path + u'/' + items))
-                    os.rmdir(path)
-                else:
-                    self.foldersearch(path)
-            elif os.path.isfile(path) and path[(path.rfind('.')):] in MEDIA_TYPES:
-                #mimetypes.guess_type(path)[0] in MIME_TYPES
-                self.organisefiles(path)
+                if os.path.isdir(path) and os.listdir(path) == []:
+                    tmp_dir = path
+                    while os.listdir(tmp_dir) == []:
+                        os.rmdir(tmp_dir)
+                        tmp_dir = os.path.split(tmp_dir)[0]
+                        print 'Removed empty directory: ' + tmp_dir
+                    print ''
+                if os.path.isdir(path) and (self.backupdir !=
+                                                os.path.dirname(path)):
+                    if os.path.basename(path) == '.mediaartlocal':
+                        print 'removing .mediaartlocal folder'
+                        for items in os.listdir(path):
+                            os.remove(os.path.join(path + u'/' + items))
+                        os.rmdir(path)
+                    else:
+                        self.foldersearch(path)
+                elif os.path.isfile(path) and (path[(path.rfind('.')):] in
+                                                MEDIA_TYPES):
+                    #mimetypes.guess_type(path)[0] in MIME_TYPES
+                    self.organisefiles(path)
         return
 
     def organisefiles(self, files):
@@ -129,15 +141,14 @@ class WorkerThread(threading.Thread):
         print 'start'
         currentdestin = os.path.normpath(self.destin + u'/' + self.destinformat)
         currentdestin = self.fill_string(files, currentdestin)
-        destin_dir = os.path.dirname(currentdestin)
         stringtest = False
         for tags in MUSIC_TAGS:
             if tags in currentdestin:
                 #print 'Tag missing: ' + tags
                 stringtest = True
                 self.returntext = [tags, os.path.dirname(files)]
+                self.stop = True
                 return False
-
         if not files == currentdestin:
             if os.path.isfile(currentdestin):
                 # create backup files without overwriting copies
@@ -147,19 +158,12 @@ class WorkerThread(threading.Thread):
                 if os.path.isfile(backup) and not files == backup:
                     count = 0
                     tmp_path = backup
-                    tmp_dir = os.path.dirname(tmp_path)
                     while os.path.isfile(backup):
                         backup = tmp_path
                         backup = (tmp_path[:(tmp_path.rfind('.'))] +
                                     str(count) + tmp_path[(
                                     tmp_path.rfind('.')):])
                         count = count + 1
-                    destin_dir = os.path.dirname(backup)
-                #if not stringtest:
-                #    if not os.path.isfile(backup):
-                #        if not os.path.isdir(os.path.dirname(backup)):
-                #            os.makedirs(os.path.dirname(backup))
-                #        shutil.move(files, backup)
                 currentdestin = backup
             if not os.path.isfile(currentdestin) and not stringtest:
                 if not os.path.isdir(os.path.dirname(currentdestin)):
@@ -201,94 +205,95 @@ class WorkerThread(threading.Thread):
                 tmp_dir = os.path.dirname(tmp_dir)
 
     def fill_string(self, files, destin):
-            tmp_title = None
-            tmp_artist = None
-            tmp_album = None
-            tmp_albumartist = None
-            tmp_genre = None
-            tmp_track = None
-            tmp_disc = None
-            tmp_year = None
-            tmp_comment = None
-            try:
-                item = eyeD3.Tag()
-                item.link(files)
-                item.setVersion(eyeD3.ID3_V2_4)
-                item.setTextEncoding(eyeD3.UTF_8_ENCODING)
-            except:
-                #print 'Tag error: ' + files
-                item = None
-            # pull tag info per item
-            if item:
-                tmp_title = item.getTitle()
-                if tmp_title == 'None':
-                    tmp_title = None
-                if tmp_title:
-                    tmp_title = tmp_title.replace('/', '_')
-                tmp_artist = item.getArtist('TPE1')
-                if tmp_artist == 'None':
-                    tmp_artist = None
-                if tmp_artist:
-                    tmp_artist = tmp_artist.replace('/', '_')
-                tmp_album = item.getAlbum()
-                if tmp_album == 'None':
-                    tmp_album = None
-                if tmp_album:
-                    tmp_album = tmp_album.replace('/', '_')
-                tmp_albumartist = item.getArtist('TPE2')
-                if tmp_albumartist == 'None':
-                    tmp_albumartist = None
-                if tmp_albumartist:
-                    tmp_albumartist = tmp_albumartist.replace('/', '_')
-                tmp_genre = str(item.getGenre()).replace('/', '_')
-                if ')' in tmp_genre:
-                    tmp_genre = tmp_genre.split(')')[1]
-                if tmp_genre == 'None':
-                    tmp_genre = None
-                tmp_track = str(item.getTrackNum()[0])
-                if tmp_track == 'None':
-                    tmp_track = None
-                if tmp_track:
-                    if '/' in tmp_track:
-                        tmp_track = tmp_track.split('/')[0]
-                    if len(tmp_track) == 1:
-                        tmp_track = '0' + str(tmp_track)
-                    if len(tmp_track) > 2:
-                        tmp_track = tmp_track[:2]
-                tmp_disc = str(item.getDiscNum()[0])
-                if '/' in tmp_disc:
-                    tmp_disc = tmp_disc.split('/')[0]
-                if len(tmp_disc) == 2:
-                    tmp_disc = tmp_disc[-1]
-                tmp_year = item.getYear()
-                if tmp_year == 'None':
-                    tmp_year = None
-                tmp_comment = item.getComment()
-                if tmp_comment == 'None':
-                    tmp_comment = None
-                if tmp_comment:
-                    tmp_comment = tmp_comment.replace('/', '_')
-                # replace temp strings with actual tags
-                if tmp_title:
-                    destin = destin.replace('%title%', tmp_title)
-                if tmp_albumartist:
-                    destin = destin.replace('%albumartist%', tmp_albumartist)
-                else:
-                    destin = destin.replace('%albumartist%', '%artist%')
-                if tmp_artist:
-                    destin = destin.replace('%artist%', tmp_artist)
-                if tmp_album:
-                    destin = destin.replace('%album%', tmp_album)
-                if tmp_genre:
-                    destin = destin.replace('%genre%', tmp_genre)
-                if tmp_track:
-                    destin = destin.replace('%track%', tmp_track)
-                if tmp_disc:
-                    destin = destin.replace('%disc%', tmp_disc)
-                if tmp_year:
-                    destin = destin.replace('%year%', tmp_year)
-                if tmp_comment:
-                    destin = destin.replace('%comment%', tmp_comment)
+        """ function to replace the variables with the tags for each file """
+        tmp_title = None
+        tmp_artist = None
+        tmp_album = None
+        tmp_albumartist = None
+        tmp_genre = None
+        tmp_track = None
+        tmp_disc = None
+        tmp_year = None
+        tmp_comment = None
+        try:
+            item = eyeD3.Tag()
+            item.link(files)
+            item.setVersion(eyeD3.ID3_V2_4)
+            item.setTextEncoding(eyeD3.UTF_8_ENCODING)
+        except:
+            #print 'Tag error: ' + files
+            item = None
+        # pull tag info per item
+        if item:
+            tmp_title = item.getTitle()
+            if tmp_title == 'None':
+                tmp_title = None
+            if tmp_title:
+                tmp_title = tmp_title.replace('/', '_')
+            tmp_artist = item.getArtist('TPE1')
+            if tmp_artist == 'None':
+                tmp_artist = None
+            if tmp_artist:
+                tmp_artist = tmp_artist.replace('/', '_')
+            tmp_album = item.getAlbum()
+            if tmp_album == 'None':
+                tmp_album = None
+            if tmp_album:
+                tmp_album = tmp_album.replace('/', '_')
+            tmp_albumartist = item.getArtist('TPE2')
+            if tmp_albumartist == 'None':
+                tmp_albumartist = None
+            if tmp_albumartist:
+                tmp_albumartist = tmp_albumartist.replace('/', '_')
+            tmp_genre = str(item.getGenre()).replace('/', '_')
+            if ')' in tmp_genre:
+                tmp_genre = tmp_genre.split(')')[1]
+            if tmp_genre == 'None':
+                tmp_genre = None
+            tmp_track = str(item.getTrackNum()[0])
+            if tmp_track == 'None':
+                tmp_track = None
+            if tmp_track:
+                if '/' in tmp_track:
+                    tmp_track = tmp_track.split('/')[0]
+                if len(tmp_track) == 1:
+                    tmp_track = '0' + str(tmp_track)
+                if len(tmp_track) > 2:
+                    tmp_track = tmp_track[:2]
+            tmp_disc = str(item.getDiscNum()[0])
+            if '/' in tmp_disc:
+                tmp_disc = tmp_disc.split('/')[0]
+            if len(tmp_disc) == 2:
+                tmp_disc = tmp_disc[-1]
+            tmp_year = item.getYear()
+            if tmp_year == 'None':
+                tmp_year = None
+            tmp_comment = item.getComment()
+            if tmp_comment == 'None':
+                tmp_comment = None
+            if tmp_comment:
+                tmp_comment = tmp_comment.replace('/', '_')
+            # replace temp strings with actual tags
+            if tmp_title:
+                destin = destin.replace('%title%', tmp_title)
+            if tmp_albumartist:
+                destin = destin.replace('%albumartist%', tmp_albumartist)
+            else:
+                destin = destin.replace('%albumartist%', '%artist%')
+            if tmp_artist:
+                destin = destin.replace('%artist%', tmp_artist)
+            if tmp_album:
+                destin = destin.replace('%album%', tmp_album)
+            if tmp_genre:
+                destin = destin.replace('%genre%', tmp_genre)
+            if tmp_track:
+                destin = destin.replace('%track%', tmp_track)
+            if tmp_disc:
+                destin = destin.replace('%disc%', tmp_disc)
+            if tmp_year:
+                destin = destin.replace('%year%', tmp_year)
+            if tmp_comment:
+                destin = destin.replace('%comment%', tmp_comment)
             destin = destin + files[(files.rfind('.')):]
             return destin
                 
@@ -458,17 +463,19 @@ class MYTAG(object):
         self.homefolder = self.homeentry.get_text()
         self.library = self.libraryentry.get_text()
         self.libraryformat = self.styleentry.get_text()
-        FILE = open(CONFIG, "w")
-        self.conf.write(FILE)
-        FILE.close()
+        conffile = open(CONFIG, "w")
+        self.conf.write(conffile)
+        conffile.close()
 
     def checkconfig(self):
+        """ create a default config if not available """
         if not os.path.isfile(CONFIG):
-            FILE = open(CONFIG, "w")
-            FILE.write("[conf]\nhome = " + os.getenv('HOME') +
+            conffile = open(CONFIG, "w")
+            conffile.write("[conf]\nhome = " + os.getenv('HOME') +
                        "\ndefaultlibrary = " + os.getenv('HOME') +
-                       "\noutputstyle = %albumartist%/(%year%) %album%/%disc%%track% - %title%)")
-            FILE.close()
+                       "\noutputstyle = %albumartist%/(%year%)" +
+                       "%album%/%disc%%track% - %title%)")
+            conffile.close()
 
     def closeconf(self, *args):
         """ hide the config window """
@@ -537,7 +544,6 @@ class MYTAG(object):
             except:
                 print 'Tag error: ' + files
                 item = None
-                pass
             if item:
                 # get the current tags
                 current_title = item.getTitle()
