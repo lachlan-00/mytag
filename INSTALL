@@ -1,0 +1,7 @@
+to install:
+sudo make -s install
+
+to uninstall:
+sudo make -s uninstall
+
+a desktop file is included so you can start from your menu or the command line.
