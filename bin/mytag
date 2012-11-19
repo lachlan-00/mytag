@@ -100,7 +100,7 @@ class WorkerThread(threading.Thread):
         self.stop = False
         try:
             tmpsort = os.listdir(folder)
-            list.sort(tmpsort)
+            tmpsort.sort(key=lambda y: y.lower())
         except OSError:
             return False
         # search for files and folders in the current dir
@@ -186,7 +186,7 @@ class WorkerThread(threading.Thread):
             destindir = os.path.dirname(destindir)
         if not os.listdir(sourcedir) == []:
             tmp_dir = os.listdir(sourcedir)
-            tmp_dir.sort()
+            tmp_dir.sort(key=lambda y: y.lower())
             found_media = False
             # check for left over media files
             for files in tmp_dir:
@@ -795,7 +795,7 @@ class MYTAG(object):
         if not type(args[0]) == type(''):
             self.current_dir = args[0].get_current_folder()
         self.filelist = os.listdir(self.current_dir)
-        self.filelist.sort()
+        self.filelist.sort(key=lambda y: y.lower())
         # clear list if we have scanned before
         for items in self.folderlist:
             self.folderlist.remove(items.iter)
@@ -816,7 +816,7 @@ class MYTAG(object):
         self.current_files = []
         try:
             files_dir = os.listdir(self.current_dir)
-            files_dir.sort()
+            files_dir.sort(key=lambda y: y.lower())
         except OSError:
             self.gohome() 
         # clear list if we have scanned before
