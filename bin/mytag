@@ -46,7 +46,7 @@ if sys.version[0] == 3:
     raise Exception('not python3 compatible, please use python 2.x')
 
 
-MEDIA_TYPES = ['.m4a', 'flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
+MEDIA_TYPES = ['.m4a', 'flac', '.flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
 MIME_TYPES = ['audio/x-wav', 'audio/flac', 'audio/ogg', 'audio/mpeg']
 YR_SPLIT = ['-', '/', '\\']
 MUSIC_TAGS = ['%artist%', '%albumartist%', '%album%', '%year%',
@@ -197,13 +197,15 @@ class WorkerThread(threading.Thread):
                         found_media = True
             # move non-media when no other media files are in the folder
             for files in tmp_dir:
+                filelist = files[(files.rfind('.')):]
                 if not found_media and not os.path.isdir(sourcedir + '/' + files):
-                    mvdest = destindir + '/' + files
-                    mvsrc = sourcedir + '/' + files
-                    # move non-media files when no more music found.
-                    shutil.move(mvsrc, mvdest)
-                    print 'Moved: ' + files
-                    print ''
+                    if not filelist in MEDIA_TYPES:
+                        mvdest = destindir + '/' + files
+                        mvsrc = sourcedir + '/' + files
+                        # move non-media files when no more music found.
+                        shutil.move(mvsrc, mvdest)
+                        print 'Moved: ' + files
+                        print ''
         # Remove empty folders, if you have moved out the last file.
         if os.listdir(sourcedir) == []:
             tmp_dir = sourcedir
@@ -486,7 +488,7 @@ class MYTAG(object):
             conffile.write("[conf]\nhome = " + os.getenv('HOME') +
                        "\ndefaultlibrary = " + os.getenv('HOME') +
                        "\noutputstyle = %albumartist%/(%year%)" +
-                       "%album%/%disc%%track% - %title%)")
+                       "%album%/%disc%%track% - %title%")
             conffile.close()
         return
 
