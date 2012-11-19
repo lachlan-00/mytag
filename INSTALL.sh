@@ -1,8 +1,9 @@
 #!/bin/sh
-gksu "cp ./usr/bin/mytag /usr/bin/"
-gksu "cp ./usr/share/applications/mytag.desktop /usr/share/applications/"
-gksu "mkdir /usr/share/mytag"
-gksu "cp ./usr/share/mytag/main.ui /usr/share/mytag/"
-gksu "cp ./usr/share/mytag/mytag.conf.example /usr/share/mytag/"
-gksu "cp ./usr/share/mytag/README /usr/share/mytag/"
-gksu "cp ./usr/share/pixmaps/mytag.png /usr/share/pixmaps/"
+cp ./bin/mytag /usr/bin/
+cp ./share/mytag.desktop /usr/share/applications/
+mkdir /usr/share/mytag
+cp ./mytag/main.ui /usr/share/mytag/
+cp ./mytag/mytag.conf.example /usr/share/mytag/
+cp ./mytag/README /usr/share/mytag/
+cp ./share/mytag.png /usr/share/pixmaps/
+

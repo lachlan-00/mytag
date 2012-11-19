@@ -1,5 +1,6 @@
 #!/bin/sh
-gksu "rm /usr/bin/mytag"
-gksu "rm /usr/share/applications/mytag.desktop"
-gksu "rm -rf /usr/share/mytag"
-gksu "rm /usr/share/pixmaps/mytag.png"
+rm /usr/bin/mytag
+rm /usr/share/applications/mytag.desktop
+rm -rf /usr/share/mytag
+rm /usr/share/pixmaps/mytag.png
+
