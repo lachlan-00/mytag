@@ -520,7 +520,11 @@ class MYTAG(object):
         else:
             self.successwindow.show()
             if not os.path.isdir(self.current_dir):
-                self.gohome()
+                if os.path.isdir(os.path.dirname(self.current_dir)):
+                    self.current_dir = os.path.dirname(self.current_dir)
+                    self.listfolder(self.current_dir)
+                else:
+                    self.gohome()
             else:
                 self.listfolder(self.current_dir)
         return True
