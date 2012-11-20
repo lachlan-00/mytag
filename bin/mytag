@@ -574,7 +574,10 @@ class MYTAG(object):
                 current_albumartist = item.getArtist('TPE2')
                 if current_albumartist == 'None':
                     current_albumartist = None
-                current_genre = str(item.getGenre())
+                try:
+                    current_genre = str(item.getGenre())
+                except eyeD3.tag.GenreException:
+                    current_genre = None
                 if current_genre == 'None':
                     current_genre = None
                 current_track = str(item.getTrackNum()[0])
@@ -678,7 +681,10 @@ class MYTAG(object):
                 tmp_albumartist = item.getArtist('TPE2')
                 if tmp_albumartist == 'None':
                     tmp_albumartist = None
-                tmp_genre = str(item.getGenre())
+                try:
+                    tmp_genre = str(item.getGenre())
+                except eyeD3.tag.GenreException:
+                    tmp_genre = None
                 if ')' in tmp_genre:
                     tmp_genre = tmp_genre.split(')')[1]
                 if tmp_genre == 'None':
