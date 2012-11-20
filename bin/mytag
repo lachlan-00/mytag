@@ -245,7 +245,10 @@ class WorkerThread(threading.Thread):
                 tmp_albumartist = None
             if tmp_albumartist:
                 tmp_albumartist = tmp_albumartist.replace('/', '_')
-            tmp_genre = str(item.getGenre())
+            try:
+                tmp_genre = str(item.getGenre())
+            except eyeD3.tag.GenreException:
+                tmp_genre = None
             if tmp_genre == 'None':
                 tmp_genre = None
             if tmp_genre:
