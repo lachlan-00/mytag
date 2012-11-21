@@ -338,8 +338,14 @@ class MYTAG(object):
         self.homefolder = self.conf.get('conf', 'home')
         self.library = self.conf.get('conf', 'defaultlibrary')
         self.libraryformat = self.conf.get('conf', 'outputstyle')
-        self.stoponerror = self.conf.get('conf', 'stoponerror')
-        self.movenonmedia = self.conf.get('conf', 'movenonmedia')
+        try:
+            self.stoponerror = self.conf.get('conf', 'stoponerror')
+        except ConfigParser.NoOptionError:
+            self.stoponerror = 'True'
+        try:
+            self.movenonmedia = self.conf.get('conf', 'movenonmedia')
+        except ConfigParser.NoOptionError:
+            self.movenonmedia = 'True'
         self.current_dir = self.homefolder
         self.current_files = None
         self.filelist = None
