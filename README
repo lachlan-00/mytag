@@ -25,6 +25,7 @@ Recent Updates
  * Added option to enable/disable stopping the organise process on tag error's
  * Added option to enable/disable moving non-media files
  * Bug fixes with pulling genre. It seems to throw an error instead of just being None like everything else.
+ * Don't list folders when you don't have permission. (Go Home)
 
 
 Supported output variables

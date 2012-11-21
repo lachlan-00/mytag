@@ -850,11 +850,15 @@ class MYTAG(object):
     def listfolder(self, *args):
         """ function to list the folder column """
         self.current_dir = args[0]
-        self.currentdirlabel.set_text('Current Folder: ' + self.current_dir)
+        self.currentdirlabel.set_text('Current Folder: ' + 
+                                      str(os.path.normpath(self.current_dir)))
         if not type(args[0]) == type(''):
             self.current_dir = args[0].get_current_folder()
-        self.filelist = os.listdir(self.current_dir)
-        self.filelist.sort(key=lambda y: y.lower())
+        try:
+            self.filelist = os.listdir(self.current_dir)
+            self.filelist.sort(key=lambda y: y.lower())
+        except OSError:
+            self.gohome()
         # clear list if we have scanned before
         for items in self.folderlist:
             self.folderlist.remove(items.iter)
