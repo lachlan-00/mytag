@@ -253,8 +253,8 @@ class WorkerThread(threading.Thread):
                 tmp_genre = None
             if tmp_genre:
                 tmp_genre = tmp_genre.replace('/', '_')
-            if ')' in tmp_genre:
-                tmp_genre = tmp_genre.split(')')[1]
+                if ')' in tmp_genre:
+                    tmp_genre = tmp_genre.split(')')[1]
             tmp_track = str(item.getTrackNum()[0])
             if tmp_track == 'None':
                 tmp_track = None
@@ -580,6 +580,10 @@ class MYTAG(object):
                     current_genre = None
                 if current_genre == 'None':
                     current_genre = None
+                if current_genre:
+                    current_genre = current_genre.replace('/', '_')
+                    if ')' in current_genre:
+                        current_genre = current_genre.split(')')[1]
                 current_track = str(item.getTrackNum()[0])
                 if '/' in current_track:
                     current_track = current_track.split('/')[0]
@@ -685,10 +689,12 @@ class MYTAG(object):
                     tmp_genre = str(item.getGenre())
                 except eyeD3.tag.GenreException:
                     tmp_genre = None
-                if ')' in tmp_genre:
-                    tmp_genre = tmp_genre.split(')')[1]
                 if tmp_genre == 'None':
                     tmp_genre = None
+                if tmp_genre:
+                    tmp_genre = tmp_genre.replace('/', '_')
+                    if ')' in tmp_genre:
+                        tmp_genre = tmp_genre.split(')')[1]
                 tmp_track = str(item.getTrackNum()[0])
                 if tmp_track == 'None':
                     tmp_track = None
