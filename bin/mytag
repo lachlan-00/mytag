@@ -282,10 +282,13 @@ class WorkerThread(threading.Thread):
                 if len(tmp_track) > 2:
                     tmp_track = tmp_track[:2]
             tmp_disc = str(item.getDiscNum()[0])
-            if '/' in tmp_disc:
-                tmp_disc = tmp_disc.split('/')[0]
-            if len(tmp_disc) == 2:
-                tmp_disc = tmp_disc[-1]
+            if tmp_disc == 'None':
+                tmp_disc = None
+            if tmp_disc:
+                if '/' in tmp_disc:
+                    tmp_disc = tmp_disc.split('/')[0]
+                if len(tmp_disc) == 2:
+                    tmp_disc = tmp_disc[-1]
             tmp_year = item.getYear()
             if tmp_year == 'None':
                 tmp_year = None
@@ -641,10 +644,13 @@ class MYTAG(object):
                 if len(current_track) > 2:
                     current_track = current_track[:2]
                 current_disc = str(item.getDiscNum()[0])
-                if '/' in current_disc:
-                    current_disc = current_disc.split('/')[0]
-                if len(current_disc) == 2:
-                    current_disc = current_disc[-1]
+                if current_disc == 'None':
+                    current_disc = None
+                if current_disc:
+                    if '/' in current_disc:
+                        current_disc = current_disc.split('/')[0]
+                    if len(current_disc) == 2:
+                        current_disc = current_disc[-1]
                 current_year = item.getYear()
                 current_comment = item.getComment()
                 if current_comment == 'None':
@@ -755,10 +761,13 @@ class MYTAG(object):
                     if len(tmp_track) > 2:
                         tmp_track = tmp_track[:2]
                 tmp_disc = str(item.getDiscNum()[0])
-                if '/' in tmp_disc:
-                    tmp_disc = tmp_disc.split('/')[0]
-                if len(tmp_disc) == 2:
-                    tmp_disc = tmp_disc[-1]
+                if tmp_disc == 'None':
+                    tmp_disc = None
+                if tmp_disc:
+                    if '/' in tmp_disc:
+                        tmp_disc = tmp_disc.split('/')[0]
+                    if len(tmp_disc) == 2:
+                        tmp_disc = tmp_disc[-1]
                 tmp_year = item.getYear()
                 if tmp_year == 'None':
                     tmp_year = None
