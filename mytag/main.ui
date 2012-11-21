@@ -122,12 +122,6 @@
               </packing>
             </child>
             <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
               <object class="GtkCheckButton" id="nonmediacheck">
                 <property name="label" translatable="yes">Move non-media files with last media file</property>
                 <property name="visible">True</property>
@@ -142,6 +136,12 @@
                 <property name="width">1</property>
                 <property name="height">1</property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -217,7 +217,7 @@
   </object>
   <object class="GtkWindow" id="main_window">
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">mytag: Python tag editor</property>
+    <property name="title" translatable="yes">mytag: Python music tagger and file organiser</property>
     <property name="default_width">900</property>
     <property name="default_height">600</property>
     <property name="hide_titlebar_when_maximized">True</property>
@@ -397,6 +397,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Go back one folder</property>
                     <child>
                       <object class="GtkImage" id="backimage">
                         <property name="visible">True</property>
@@ -416,6 +417,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Go to your home folder</property>
                     <child>
                       <object class="GtkImage" id="homeimage">
                         <property name="visible">True</property>
@@ -841,6 +843,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Save tag changes</property>
                     <child>
                       <object class="GtkImage" id="image1">
                         <property name="visible">True</property>
@@ -885,6 +888,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Organise all files in your current folder</property>
                     <child>
                       <object class="GtkImage" id="image3">
                         <property name="visible">True</property>
