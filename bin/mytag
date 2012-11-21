@@ -67,6 +67,8 @@ class WorkerThread(threading.Thread):
         self.destin = None
         self.destinformat = None
         self.backupdir = None
+        self.stoponerrors = None
+        self.movemedia = None
         self.stop = None
         self.start()
         return None
@@ -78,6 +80,8 @@ class WorkerThread(threading.Thread):
         self.files = None
         self.destin = None
         self.destinformat = None
+        self.stoponerrors = None
+        self.movemedia = None
         if args:
             if args[0]:
                 self.source = args[0]
@@ -87,6 +91,16 @@ class WorkerThread(threading.Thread):
                 self.destin = args[2]
             if args[3]:
                 self.destinformat = args[3].lower()
+            if args[4]:
+                if args[4] == 'True':
+                    self.stoponerrors = True
+                else:
+                    self.stoponerrors = False
+            if args[5]:
+                if args[5] == 'True':
+                    self.movemedia = True
+                else:
+                    self.movemedia = False
             if self.destin:
                 self.backupdir = os.path.normpath(self.destin + '/BACKUP/')
             self.foldersearch(self.source)
@@ -141,8 +155,9 @@ class WorkerThread(threading.Thread):
             # if a tag variable is found in the output do not continue
             if tags in currentdestin:
                 stringtest = True
-                self.returntext = [tags, os.path.dirname(files)]
-                self.stop = True
+                if self.stoponerrors:
+                    self.returntext = [tags, os.path.dirname(files)]
+                    self.stop = True
                 return False
         if not files == currentdestin:
             # create a backup when conflicts are found
@@ -187,15 +202,16 @@ class WorkerThread(threading.Thread):
                     filelist = files[(files.rfind('.')):]
                     if filelist in MEDIA_TYPES:
                         found_media = True
-            # move non-media when no other media files are in the folder
-            for files in tmp_dir:
-                filelist = files[(files.rfind('.')):]
-                if not found_media and not os.path.isdir(sourcedir + '/' + files):
-                    if not filelist in MEDIA_TYPES:
-                        mvdest = destindir + '/' + files
-                        mvsrc = sourcedir + '/' + files
-                        # move non-media files when no more music found.
-                        shutil.move(mvsrc, mvdest)
+            if self.movemedia:
+                # move non-media when no other media files are in the folder
+                for files in tmp_dir:
+                    filelist = files[(files.rfind('.')):]
+                    if not found_media and not os.path.isdir(sourcedir + '/' + files):
+                        if not filelist in MEDIA_TYPES:
+                            mvdest = destindir + '/' + files
+                            mvsrc = sourcedir + '/' + files
+                            # move non-media files when no more music found.
+                            shutil.move(mvsrc, mvdest)
         # Remove empty folders, if you have moved out the last file.
         if os.listdir(sourcedir) == []:
             tmp_dir = sourcedir
@@ -322,6 +338,8 @@ class MYTAG(object):
         self.homefolder = self.conf.get('conf', 'home')
         self.library = self.conf.get('conf', 'defaultlibrary')
         self.libraryformat = self.conf.get('conf', 'outputstyle')
+        self.stoponerror = self.conf.get('conf', 'stoponerror')
+        self.movenonmedia = self.conf.get('conf', 'movenonmedia')
         self.current_dir = self.homefolder
         self.current_files = None
         self.filelist = None
@@ -364,6 +382,8 @@ class MYTAG(object):
         self.libraryentry = self.builder.get_object('libraryentry')
         self.styleentry = self.builder.get_object('styleentry')
         self.homeentry = self.builder.get_object('homeentry')
+        self.errorcheck = self.builder.get_object('errorcheck')
+        self.mediacheck = self.builder.get_object('nonmediacheck')
         self.applybutton = self.builder.get_object("applyconf")
         self.closebutton = self.builder.get_object("closeconf")
         # load popup window items
@@ -457,6 +477,14 @@ class MYTAG(object):
         self.homeentry.set_text(self.homefolder)
         self.libraryentry.set_text(self.library)
         self.styleentry.set_text(self.libraryformat)
+        if self.stoponerror == 'True':
+            self.errorcheck.set_active(True)
+        else:
+            self.errorcheck.set_active(False)
+        if self.movenonmedia == 'True':
+            self.mediacheck.set_active(True)
+        else:
+            self.mediacheck.set_active(False)
         self.confwindow.show()
         return
 
@@ -466,6 +494,18 @@ class MYTAG(object):
         self.conf.set('conf', 'home', self.homeentry.get_text())
         self.conf.set('conf', 'defaultlibrary', self.libraryentry.get_text())
         self.conf.set('conf', 'outputstyle', self.styleentry.get_text())
+        if self.errorcheck.get_active():
+            self.conf.set('conf', 'stoponerror', 'True')
+            self.stoponerror = 'True'
+        else:
+            self.conf.set('conf', 'stoponerror', 'False')
+            self.stoponerror = 'False'
+        if self.mediacheck.get_active():
+            self.conf.set('conf', 'movenonmedia', 'True')
+            self.movenonmedia = 'True'
+        else:
+            self.conf.set('conf', 'movenonmedia', 'False')
+            self.movenonmedia = 'False'
         self.homefolder = self.homeentry.get_text()
         self.library = self.libraryentry.get_text()
         self.libraryformat = self.styleentry.get_text()
@@ -481,7 +521,8 @@ class MYTAG(object):
             conffile.write("[conf]\nhome = " + os.getenv('HOME') +
                        "\ndefaultlibrary = " + os.getenv('HOME') +
                        "\noutputstyle = %albumartist%/(%year%)" +
-                       "%album%/%disc%%track% - %title%")
+                       "%album%/%disc%%track% - %title%\n" +
+                       "stoponerror = True\nmovenonmedia = True\n")
             conffile.close()
         return
 
@@ -511,7 +552,8 @@ class MYTAG(object):
     def organisefolder(self, *args):
         """ send organise to the workerthread... """
         returnstring = self.worker.run(self.current_dir, self.filelist,
-                                       self.library, self.libraryformat)
+                                       self.library, self.libraryformat,
+                                       self.stoponerror, self.movenonmedia)
         if type(returnstring) == type(''):
             self.popwindow.set_markup('Error: Opening ' + returnstring)
             self.popwindow.show()
