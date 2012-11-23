@@ -551,15 +551,6 @@ class MYTAG(object):
         self.successwindow.hide()
         return
 
-    def folderclick(self, *args):
-        """ traverse folders on double click """
-        model, treeiter = self.foldertree.get_selection().get_selected()
-        if treeiter:
-            new_dir = self.current_dir + '/' + model[treeiter][0]
-        if os.path.isdir(new_dir):
-            self.listfolder(new_dir)
-        return
-
     def loadselection(self, *args):
         """ load files into tag editor """
         model, fileiter = self.contenttree.get_selection().get_selected_rows()
@@ -569,6 +560,15 @@ class MYTAG(object):
             self.current_files.append(tmp_file)
         self.loadedlabel.set_text('Loaded: ' + str(len(fileiter)))
         self.loadtags(self.current_files)
+        return
+
+    def folderclick(self, *args):
+        """ traverse folders on double click """
+        model, treeiter = self.foldertree.get_selection().get_selected()
+        if treeiter:
+            new_dir = self.current_dir + '/' + model[treeiter][0]
+        if os.path.isdir(new_dir):
+            self.listfolder(new_dir)
         return
 
     def gohome(self, *args):
@@ -581,16 +581,6 @@ class MYTAG(object):
         back_dir = os.path.dirname(self.current_dir)
         self.clearopenfiles()
         self.listfolder(back_dir)
-        return
-
-    def clearopenfiles(self):
-        """ clear the tags ui when changing folder """
-        count = 0
-        while count < len(self.uibuttons):
-            self.uibuttons[count][0].set_active(False)
-            self.uibuttons[count][1].set_text('')
-            count = count + 1
-        self.loadedlabel.set_text('')
         return
 
     def quit(self, *args):
@@ -810,20 +800,7 @@ class MYTAG(object):
                         tmp_disc = tmp_disc.split('/')[0]
                     if len(tmp_disc) == 2:
                         tmp_disc = tmp_disc[-1]
-             def gohome(self, *args):
-        """ go to the defined home folder """
-        self.clearopenfiles()
-        self.listfolder(self.homefolder)
-
-    def clearopenfiles(self):
-        """ clear the tags ui when changing folder """
-        count = 0
-        while count < len(self.uibuttons):
-            self.uibuttons[count][0].set_active(False)
-            self.uibuttons[count][1].set_text('')
-            count = count + 1
-        self.loadedlabel.set_text('')
-        return       tmp_year = item.getYear()
+                tmp_year = item.getYear()
                 if tmp_year == 'None':
                     tmp_year = None
                 tmp_comment = item.getComment()
@@ -867,6 +844,16 @@ class MYTAG(object):
                 else:
                     self.uibuttons[count][1].set_text('[Multiple]')
             count = count + 1
+        return
+
+    def clearopenfiles(self):
+        """ clear the tags ui when changing folder """
+        count = 0
+        while count < len(self.uibuttons):
+            self.uibuttons[count][0].set_active(False)
+            self.uibuttons[count][1].set_text('')
+            count = count + 1
+        self.loadedlabel.set_text('')
         return
 
     def listfolder(self, *args):
