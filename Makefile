@@ -4,11 +4,13 @@ UNINSTALLTEXT="mytag has been removed"
 
 install-req:
 	@mkdir -p $(INSTALLPATH)
-	@cp bin/mytag /usr/bin/ -f
-	@cp share/mytag.desktop /usr/share/applications/ -f
 	@cp mytag/* $(INSTALLPATH) -f
-	@cp share/mytag.png /usr/share/pixmaps
 	@cp README $(INSTALLPATH) -f
+	@cp AUTHORS $(INSTALLPATH) -f
+	@cp LICENSE $(INSTALLPATH) -f
+	@cp bin/mytag /usr/bin/ -f
+	@cp share/mytag.png /usr/share/pixmaps -f
+	@cp share/mytag.desktop /usr/share/applications/ -f
 
 install: install-req
 	@echo $(INSTALLTEXT)

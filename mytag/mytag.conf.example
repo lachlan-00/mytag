@@ -1,5 +1,0 @@
-[conf]
-home = /home/user/Music
-defaultlibrary = /home/user/Music/albums
-outputstyle = %albumartist%/(%year%) %album%/%disc%%track% - %title%
-
