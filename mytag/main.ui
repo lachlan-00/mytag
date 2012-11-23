@@ -9,13 +9,13 @@
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <child>
-      <object class="GtkBox" id="box9">
+      <object class="GtkBox" id="configbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
-          <object class="GtkGrid" id="grid3">
+          <object class="GtkGrid" id="confgrid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
@@ -151,11 +151,11 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="box10">
+          <object class="GtkBox" id="configibox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkLabel" id="label4">
+              <object class="GtkLabel" id="fillerlabel5">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
@@ -222,13 +222,13 @@
     <property name="default_height">600</property>
     <property name="hide_titlebar_when_maximized">True</property>
     <child>
-      <object class="GtkBox" id="box4">
+      <object class="GtkBox" id="mainbox1">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="vexpand">True</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkBox" id="box17">
+          <object class="GtkBox" id="mainbox2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
@@ -249,7 +249,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <child>
-                  <object class="GtkImage" id="image2">
+                  <object class="GtkImage" id="settingsimage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="pixbuf">/usr/share/icons/gnome/16x16/categories/applications-system.png</property>
@@ -270,41 +270,15 @@
           </packing>
         </child>
         <child>
-          <object class="GtkGrid" id="grid1">
+          <object class="GtkGrid" id="maingrid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkBox" id="box8">
+              <object class="GtkBox" id="loadbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkLabel" id="label1">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">2</property>
-                <property name="top_attach">3</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="box7">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkLabel" id="label3">
+                  <object class="GtkLabel" id="loadlabel">
                     <property name="width_request">190</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -348,7 +322,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="scrolledwindow1">
+              <object class="GtkScrolledWindow" id="dirscrolled">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="hexpand">True</property>
@@ -376,11 +350,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="box1">
+              <object class="GtkBox" id="choosebox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkLabel" id="label2">
+                  <object class="GtkLabel" id="chooselabel">
                     <property name="width_request">160</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -442,13 +416,13 @@
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="box3">
+              <object class="GtkBox" id="tagbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkGrid" id="grid2">
+                  <object class="GtkGrid" id="taggrid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
@@ -733,7 +707,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox" id="box12">
+                      <object class="GtkBox" id="savbox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
@@ -770,7 +744,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label6">
+                      <object class="GtkLabel" id="fillerlabel4">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                       </object>
@@ -800,7 +774,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="scrolledwindow2">
+              <object class="GtkScrolledWindow" id="filescrolled">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="hexpand">True</property>
@@ -830,7 +804,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="box5">
+              <object class="GtkBox" id="savebox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
@@ -876,11 +850,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="box2">
+              <object class="GtkBox" id="organisebox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkLabel" id="label5">
+                  <object class="GtkLabel" id="organiselabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="xalign">0.89999997615814209</property>
@@ -921,7 +895,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label15">
+              <object class="GtkLabel" id="fillerlabel1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -933,7 +907,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label16">
+              <object class="GtkLabel" id="fillerlabel2">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -945,7 +919,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label17">
+              <object class="GtkLabel" id="fillerlabel3">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -959,6 +933,9 @@
             <child>
               <placeholder/>
             </child>
+            <child>
+              <placeholder/>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -967,7 +944,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="currentdirlabel-old">
+          <object class="GtkLabel" id="statuslabel">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="xalign">0.0099999997764825821</property>
@@ -988,7 +965,7 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="message_type">error</property>
     <child internal-child="vbox">
-      <object class="GtkBox" id="messagedialog-vbox">
+      <object class="GtkBox" id="popupbox">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
@@ -1035,7 +1012,7 @@
     <property name="text" translatable="yes">Completed</property>
     <property name="secondary_text" translatable="yes">Your files have been organised.</property>
     <child internal-child="vbox">
-      <object class="GtkBox" id="messagedialog-vbox1">
+      <object class="GtkBox" id="successbox">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>

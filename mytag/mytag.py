@@ -625,6 +625,8 @@ class MYTAG(object):
         # check for active changes
         count = 0
         tmp_changes = []
+        if self.current_files == tmp_changes:
+            return False
         while count < len(self.uibuttons):
             if self.uibuttons[count][0].get_active():
                 tmp_changes.append([count, self.uibuttons[count][1].get_text()])
@@ -834,6 +836,8 @@ class MYTAG(object):
         # compare tags
         count = 0
         for types in self.trackselection:
+            if types == []:
+                return False
             comparison = False
             if len(args[0]) == 1:
                 comparison = True
