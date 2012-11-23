@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# launch mytag
+/usr/share/mytag/mytag.py
