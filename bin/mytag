@@ -386,7 +386,6 @@ class MYTAG(object):
         self.discentry = self.builder.get_object('discentry')
         self.yearentry = self.builder.get_object('yearentry')
         self.commententry = self.builder.get_object('commententry')
-        self.loadedlabel = self.builder.get_object('loadedlabel')
         self.tagimage = self.builder.get_object('tagimage')
         self.currentdirlabel = self.builder.get_object('currentdirlabel')
         # load config window items
@@ -562,7 +561,6 @@ class MYTAG(object):
             tmp_file = self.current_dir + '/' + model[files][0]
             self.current_files.append(tmp_file)
         self.tagimage.set_from_file(ICON_DIR + '16x16/emotes/face-plain.png')
-        self.loadedlabel.set_text('Loaded: ' + str(len(fileiter)))
         self.loadtags(self.current_files)
         return
 
@@ -871,7 +869,6 @@ class MYTAG(object):
             self.uibuttons[count][1].set_text('')
             count = count + 1
         self.tagimage.set_from_file(ICON_DIR + '16x16/emotes/face-plain.png')
-        self.loadedlabel.set_text('')
         return
 
     def listfolder(self, *args):
