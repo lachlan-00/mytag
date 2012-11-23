@@ -50,7 +50,7 @@ YR_SPLIT = ['-', '/', '\\']
 MUSIC_TAGS = ['%artist%', '%albumartist%', '%album%', '%year%',
                  '%title%', '%disc%', '%track%', '%genre%', '%comment%']
 CONFIG = xdg_config_dirs[0] + '/mytag.conf'
-
+ICON_DIR = '/usr/share/icons/gnome/'
 
 class WorkerThread(threading.Thread):
     """ run a separate thread to the ui """
@@ -206,7 +206,8 @@ class WorkerThread(threading.Thread):
                 # move non-media when no other media files are in the folder
                 for files in tmp_dir:
                     filelist = files[(files.rfind('.')):]
-                    if not found_media and not os.path.isdir(sourcedir + '/' + files):
+                    if not found_media and not os.path.isdir(sourcedir +
+                                                               '/' + files):
                         if not filelist in MEDIA_TYPES:
                             mvdest = destindir + '/' + files
                             mvsrc = sourcedir + '/' + files
@@ -386,6 +387,7 @@ class MYTAG(object):
         self.yearentry = self.builder.get_object('yearentry')
         self.commententry = self.builder.get_object('commententry')
         self.loadedlabel = self.builder.get_object('loadedlabel')
+        self.tagimage = self.builder.get_object('tagimage')
         self.currentdirlabel = self.builder.get_object('currentdirlabel')
         # load config window items
         self.confwindow = self.builder.get_object("config_window")
@@ -445,6 +447,7 @@ class MYTAG(object):
         self.fileview.connect("row-activated", self.loadselection)
         self.contenttree.append_column(filecolumn)
         self.contenttree.set_model(self.contentlist)
+        self.tagimage.set_from_file(ICON_DIR + '16x16/emotes/face-plain.png')
         # list default dir on startup
         if not os.path.isdir(self.homefolder):
             os.makedirs(self.homefolder)
@@ -558,6 +561,7 @@ class MYTAG(object):
         for files in fileiter:
             tmp_file = self.current_dir + '/' + model[files][0]
             self.current_files.append(tmp_file)
+        self.tagimage.set_from_file(ICON_DIR + '16x16/emotes/face-plain.png')
         self.loadedlabel.set_text('Loaded: ' + str(len(fileiter)))
         self.loadtags(self.current_files)
         return
@@ -627,6 +631,7 @@ class MYTAG(object):
             if self.uibuttons[count][0].get_active():
                 tmp_changes.append([count, self.uibuttons[count][1].get_text()])
             count = count + 1
+        save_fail = False
         for files in self.current_files:
             tmp_title = None
             tmp_artist = None
@@ -644,6 +649,7 @@ class MYTAG(object):
                 item.setTextEncoding(eyeD3.UTF_8_ENCODING)
             except:
                 item = None
+                save_fail = True
             if item:
                 # get the current tags
                 current_title = item.getTitle()
@@ -729,10 +735,21 @@ class MYTAG(object):
                 if tmp_comment != None and tmp_comment != current_comment:
                     item.removeComments()
                     item.addComment(tmp_comment)
-                # write changes
-                item.update(eyeD3.ID3_V2_4)
+                try:
+                    # write changes
+                    item.update(eyeD3.ID3_V2_4)
+                except:
+                    self.tagimage.set_from_file(ICON_DIR +
+                                                '16x16/emotes/face-crying.png')
+                    save_fail = True
                 # reload new tags
                 self.loadtags(self.current_files)
+        if not save_fail:
+            self.tagimage.set_from_file(ICON_DIR +
+                                        '16x16/emotes/face-laugh.png')
+        else:
+            self.tagimage.set_from_file(ICON_DIR +
+                                        '16x16/emotes/face-crying.png')
         return
 
     def loadtags(self, *args):
@@ -853,6 +870,7 @@ class MYTAG(object):
             self.uibuttons[count][0].set_active(False)
             self.uibuttons[count][1].set_text('')
             count = count + 1
+        self.tagimage.set_from_file(ICON_DIR + '16x16/emotes/face-plain.png')
         self.loadedlabel.set_text('')
         return
 
