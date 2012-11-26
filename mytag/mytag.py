@@ -431,6 +431,7 @@ class MYTAG(object):
         """ connect all the window wisgets """
         # main window actions
         self.window.connect("destroy", self.quit)
+        self.folderview.connect("key-press-event", self.keypress)
         self.settingsbutton.connect("clicked", self.showconfig)
         self.editbutton.connect("clicked", self.loadselection)
         self.backbutton.connect("clicked", self.goback)
@@ -592,6 +593,11 @@ class MYTAG(object):
         self.clearopenfiles()
         self.listfolder(back_dir)
         return
+
+    def keypress(self, actor, event):
+        """ capture backspace key for folder navigation """
+        if event.get_keycode()[1] == 22:
+            self.goback()
 
     def quit(self, *args):
         """ stop the process thread and close the program"""
@@ -767,9 +773,6 @@ class MYTAG(object):
         if not save_fail:
             self.tagimage.set_from_file(ICON_DIR +
                                         '16x16/emotes/face-laugh.png')
-        #else:
-        #    self.tagimage.set_from_file(ICON_DIR +
-        #                                '16x16/emotes/face-crying.png')
         return
 
     def loadtags(self, *args):

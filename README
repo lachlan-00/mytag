@@ -22,15 +22,7 @@ Features other taggers don't have
 
 Recent Updates
 --------------
- * Added option to enable/disable stopping the organise process when a tag error is found.
- * Added option to enable/disable moving non-media files (jpg, txt, etc.)
- * Added emote indicator when saving tags
- * Bug fixes with getgenre. It seems to throw an error instead of just being None like everything else.
- * Fix getdisc = 'None'
- * Added more information & tooltips
- * Don't list folders when you don't have permission. (Go Home)
- * All tags used  by mytag checked by the organise function now.
- * Code structure cleaned up.
+ * Added backspace to folder navigation (go back one folder)
 
 
 Supported output variables
