@@ -9,7 +9,7 @@
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <child>
-      <object class="GtkBox" id="configbox">
+      <object class="GtkBox" id="configbox1">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
@@ -151,7 +151,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="configibox">
+          <object class="GtkBox" id="configbox2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>

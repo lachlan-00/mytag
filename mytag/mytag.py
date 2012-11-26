@@ -45,7 +45,7 @@ if sys.version[0] == 3:
     raise Exception('not python3 compatible, please use python 2.x')
 
 
-MEDIA_TYPES = ['.m4a', 'flac', '.flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
+MEDIA_TYPES = ['.m4a', '.flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
 YR_SPLIT = ['-', '/', '\\']
 MUSIC_TAGS = ['%artist%', '%albumartist%', '%album%', '%year%',
                  '%title%', '%disc%', '%track%', '%genre%', '%comment%']
@@ -115,13 +115,17 @@ class WorkerThread(threading.Thread):
         except OSError:
             self.returntext = folder
             return False
+        except TypeError:
+            print folder
+            self.returntext = folder
+            return False
         # search for files and folders in the current dir
         for items in tmpsort:
             if not self.stop:
                 try:
                     path = os.path.normpath((folder).decode('utf-8') + u'/' +
                                             (items).decode('utf-8'))
-                except:
+                except UnicodeEncodeError:
                     path = os.path.normpath(folder + '/' + items)
                 if os.path.isdir(path) and os.listdir(path) == []:
                     tmp_dir = path
@@ -237,7 +241,10 @@ class WorkerThread(threading.Thread):
             item.link(files)
             item.setVersion(eyeD3.ID3_V2_4)
             item.setTextEncoding(eyeD3.UTF_8_ENCODING)
-        except:
+        except Exception, err:
+            print 'line 244'
+            print type(err)
+            print err
             # Tag error
             item = None
         # pull tag info for the current item
@@ -324,7 +331,7 @@ class WorkerThread(threading.Thread):
         return
 
 class MYTAG(object):
-    """ browse folders and set set using ui """
+    """ browse folders and set tags using ui """
     def __init__(self):
         """ start mytag """
         if not TAG_SUPPORT:
@@ -501,7 +508,7 @@ class MYTAG(object):
         return
 
     def saveconf(self, *args):
-        """ save any config changes """
+        """ save any config changes and update live settings"""
         self.conf.read(CONFIG)
         self.conf.set('conf', 'home', self.homeentry.get_text())
         self.conf.set('conf', 'defaultlibrary', self.libraryentry.get_text())
@@ -521,6 +528,7 @@ class MYTAG(object):
         self.homefolder = self.homeentry.get_text()
         self.library = self.libraryentry.get_text()
         self.libraryformat = self.styleentry.get_text()
+        # write to conf file
         conffile = open(CONFIG, "w")
         self.conf.write(conffile)
         conffile.close()
@@ -544,17 +552,17 @@ class MYTAG(object):
         return
 
     def closepop(self, *args):
-        """ hide the config window """
+        """ hide the error popup window """
         self.popwindow.hide()
         return
 
     def closesuccess(self, *args):
-        """ hide the config window """
+        """ hide the organise completed window """
         self.successwindow.hide()
         return
 
     def loadselection(self, *args):
-        """ load files into tag editor """
+        """ load selected files into tag editor """
         model, fileiter = self.contenttree.get_selection().get_selected_rows()
         self.current_files = []
         for files in fileiter:
@@ -594,10 +602,11 @@ class MYTAG(object):
         return False
 
     def organisefolder(self, *args):
-        """ send organise to the workerthread... """
+        """ send organise to the workerthread for processing """
         returnstring = self.worker.run(self.current_dir, self.filelist,
                                        self.library, self.libraryformat,
                                        self.stoponerror, self.movenonmedia)
+        # notify for different errors
         if type(returnstring) == type(''):
             self.popwindow.set_markup('Error: Opening ' + returnstring)
             self.popwindow.show()
@@ -622,16 +631,18 @@ class MYTAG(object):
 
     def savetags(self, *args):
         """ update the loaded files with new tags """
-        # check for active changes
         count = 0
         tmp_changes = []
+        # check for changes
         if self.current_files == tmp_changes:
             return False
+        # add changes that are ticked in the UI
         while count < len(self.uibuttons):
             if self.uibuttons[count][0].get_active():
                 tmp_changes.append([count, self.uibuttons[count][1].get_text()])
             count = count + 1
         save_fail = False
+        # update tags for each file selected
         for files in self.current_files:
             tmp_title = None
             tmp_artist = None
@@ -647,7 +658,10 @@ class MYTAG(object):
                 item.link(files)
                 item.setVersion(eyeD3.ID3_V2_4)
                 item.setTextEncoding(eyeD3.UTF_8_ENCODING)
-            except:
+            except Exception, err:
+                print 'line 661'
+                print type(err)
+                print err
                 item = None
                 save_fail = True
             if item:
@@ -713,7 +727,7 @@ class MYTAG(object):
                         tmp_year = changes[1]
                     if changes[0] == 8:
                         tmp_comment = changes[1]
-                # set changes
+                # compare and set changes if required
                 if tmp_title != None and tmp_title != current_title:
                     item.setTitle(tmp_title)
                 if tmp_artist != None and tmp_artist != current_artist:
@@ -736,20 +750,26 @@ class MYTAG(object):
                     item.removeComments()
                     item.addComment(tmp_comment)
                 try:
-                    # write changes
+                    # write changes to file
                     item.update(eyeD3.ID3_V2_4)
-                except:
+                except Exception, err:
+                    print 'line 755'
+                    print type(err)
+                    print err
                     self.tagimage.set_from_file(ICON_DIR +
                                                 '16x16/emotes/face-crying.png')
                     save_fail = True
-                # reload new tags
-                self.loadtags(self.current_files)
+                    print 'Tag Save Error'
+                    print files
+                    return False
+        # reload new tags after saving files
+        self.loadtags(self.current_files)
         if not save_fail:
             self.tagimage.set_from_file(ICON_DIR +
                                         '16x16/emotes/face-laugh.png')
-        else:
-            self.tagimage.set_from_file(ICON_DIR +
-                                        '16x16/emotes/face-crying.png')
+        #else:
+        #    self.tagimage.set_from_file(ICON_DIR +
+        #                                '16x16/emotes/face-crying.png')
         return
 
     def loadtags(self, *args):
@@ -772,7 +792,10 @@ class MYTAG(object):
                 item.link(musicfiles)
                 item.setVersion(eyeD3.ID3_V2_4)
                 item.setTextEncoding(eyeD3.UTF_8_ENCODING)
-            except:
+            except Exception, err:
+                print 'line 795'
+                print type(err)
+                print err
                 # Tag error
                 item = None
             # pull tag info per item
@@ -919,7 +942,7 @@ class MYTAG(object):
         # search the supplied directory for items
         for items in files_dir:
             test_file = os.path.isfile(self.current_dir + '/' + items)
-            test_ext = items[-4:] in MEDIA_TYPES
+            test_ext = items[(items.rfind('.')):] in MEDIA_TYPES
             if not items[0] == '.' and test_file and test_ext:
                 self.contentlist.append([items])
         return
