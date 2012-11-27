@@ -29,7 +29,7 @@ import ConfigParser
 import sys
 
 from gi.repository import Gtk
-from gi.repository import Gdk
+from gi.repository import GLib
 
 from xdg.BaseDirectory import xdg_config_dirs
 
@@ -956,5 +956,5 @@ class MYTAG(object):
 
 
 if __name__ == "__main__":
-    Gdk.threads_init()
+    GLib.threads_init()
     MYTAG()

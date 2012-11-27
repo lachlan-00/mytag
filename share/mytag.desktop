@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=mytag
-Comment=Python musi tag editor
+Comment=Python music tag editor
 Exec=/usr/bin/mytag
 Icon=/usr/share/pixmaps/mytag.png
 Terminal=false
