@@ -370,7 +370,6 @@ class MYTAG(object):
         self.gobutton = self.builder.get_object("gobutton")
         self.organisebutton = self.builder.get_object('organisebutton')
         self.folderlist = self.builder.get_object('folderstore')
-        #self.folderview = self.builder.get_object('folderview')
         self.folderview = self.builder.get_object("folderview")
         self.fileview = self.builder.get_object("fileview")
         self.contentlist = self.builder.get_object('filestore')
