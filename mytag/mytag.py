@@ -370,7 +370,7 @@ class MYTAG(object):
         self.gobutton = self.builder.get_object("gobutton")
         self.organisebutton = self.builder.get_object('organisebutton')
         self.folderlist = self.builder.get_object('folderstore')
-        self.foldertree = self.builder.get_object('folderview')
+        #self.folderview = self.builder.get_object('folderview')
         self.folderview = self.builder.get_object("folderview")
         self.fileview = self.builder.get_object("fileview")
         self.contentlist = self.builder.get_object('filestore')
@@ -449,8 +449,8 @@ class MYTAG(object):
         foldercolumn = Gtk.TreeViewColumn("Select Folder:", cell, text=0)
         filecolumn = Gtk.TreeViewColumn("Select Files", cell, text=0)
         self.folderview.connect("row-activated", self.folderclick)
-        self.foldertree.append_column(foldercolumn)
-        self.foldertree.set_model(self.folderlist)
+        self.folderview.append_column(foldercolumn)
+        self.folderview.set_model(self.folderlist)
         self.fileview.connect("row-activated", self.loadselection)
         self.contenttree.append_column(filecolumn)
         self.contenttree.set_model(self.contentlist)
@@ -575,7 +575,7 @@ class MYTAG(object):
 
     def folderclick(self, *args):
         """ traverse folders on double click """
-        model, treeiter = self.foldertree.get_selection().get_selected()
+        model, treeiter = self.folderview.get_selection().get_selected()
         if treeiter:
             new_dir = self.current_dir + '/' + model[treeiter][0]
         if os.path.isdir(new_dir):
@@ -917,13 +917,15 @@ class MYTAG(object):
         for items in self.folderlist:
             self.folderlist.remove(items.iter)
         # clear combobox before adding entries
-        for items in self.foldertree:
-            self.foldertree.remove(items.iter)
+        for items in self.folderview:
+            self.folderview.remove(items.iter)
         # search the supplied directory for items
         for items in self.filelist:
             test_dir = os.path.isdir(self.current_dir + '/' + items)
             if not items[0] == '.' and test_dir:
                 self.folderlist.append([items])
+        if len(self.folderlist) == 0:
+            self.folderlist.append(['[No more Folders]'])
         self.clearopenfiles()
         self.listfiles()
         return
@@ -948,6 +950,8 @@ class MYTAG(object):
             test_ext = items[(items.rfind('.')):] in MEDIA_TYPES
             if not items[0] == '.' and test_file and test_ext:
                 self.contentlist.append([items])
+        if len(self.contentlist) == 0:
+            self.contentlist.append(['[No media files found]'])
         return
 
 
