@@ -1,7 +1,7 @@
 ---------------------------------------------
 mytag: Python music tagger and file organiser
 ---------------------------------------------
-v1.x - Development
+v1.1 - 20121128
 
 Why do this?
 ------------
@@ -23,6 +23,8 @@ Features other taggers don't have
 Recent Updates
 --------------
  * Added backspace to folder navigation (go back one folder)
+ * Corrected threading for GTK3 programs
+ * UI and code structure updates
 
 
 Supported output variables
