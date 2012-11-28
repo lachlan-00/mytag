@@ -52,6 +52,7 @@ MUSIC_TAGS = ['%artist%', '%albumartist%', '%album%', '%year%',
 CONFIG = xdg_config_dirs[0] + '/mytag.conf'
 ICON_DIR = '/usr/share/icons/gnome/'
 
+
 class WorkerThread(threading.Thread):
     """ run a separate thread to the ui """
     def __init__(self, notify_window):
@@ -329,6 +330,7 @@ class WorkerThread(threading.Thread):
             destin = destin + files[(files.rfind('.')):]
             return destin
         return
+
 
 class MYTAG(object):
     """ browse folders and set tags using ui """
@@ -903,7 +905,7 @@ class MYTAG(object):
     def listfolder(self, *args):
         """ function to list the folder column """
         self.current_dir = args[0]
-        self.currentdirlabel.set_text('Current Folder: ' + 
+        self.currentdirlabel.set_text('Current Folder: ' +
                                       str(os.path.normpath(self.current_dir)))
         if not type(args[0]) == type(''):
             self.current_dir = args[0].get_current_folder()
@@ -936,7 +938,7 @@ class MYTAG(object):
             files_dir = os.listdir(self.current_dir)
             files_dir.sort(key=lambda y: y.lower())
         except OSError:
-            self.gohome() 
+            self.gohome()
         # clear list if we have scanned before
         for items in self.contentlist:
             self.contentlist.remove(items.iter)
