@@ -433,6 +433,15 @@ class MYTAG(object):
         # main window actions
         self.window.connect("destroy", self.quit)
         self.folderview.connect("key-press-event", self.keypress)
+        self.titleentry.connect("key-press-event", self.entrycatch)
+        self.artistentry.connect("key-press-event", self.entrycatch)
+        self.albumentry.connect("key-press-event", self.entrycatch)
+        self.albumartistentry.connect("key-press-event", self.entrycatch)
+        self.genreentry.connect("key-press-event", self.entrycatch)
+        self.trackentry.connect("key-press-event", self.entrycatch)
+        self.discentry.connect("key-press-event", self.entrycatch)
+        self.yearentry.connect("key-press-event", self.entrycatch)
+        self.commententry.connect("key-press-event", self.entrycatch)
         self.settingsbutton.connect("clicked", self.showconfig)
         self.editbutton.connect("clicked", self.loadselection)
         self.backbutton.connect("clicked", self.goback)
@@ -599,6 +608,36 @@ class MYTAG(object):
         """ capture backspace key for folder navigation """
         if event.get_keycode()[1] == 22:
             self.goback()
+
+    def entrycatch(self, actor, event):
+        """ capture key presses to activate checkboxes """
+        if actor == self.titleentry:
+            if not self.titlebutton.get_active():
+                self.titlebutton.set_active(True)
+        if actor == self.artistentry:
+            if not self.artistbutton.get_active():
+                self.artistbutton.set_active(True)
+        if actor == self.albumentry:
+            if not self.albumbutton.get_active():
+                self.albumbutton.set_active(True)
+        if actor == self.albumartistentry:
+            if not self.albumartistbutton.get_active():
+                self.albumartistbutton.set_active(True)
+        if actor == self.genreentry:
+            if not self.genrebutton.get_active():
+                self.genrebutton.set_active(True)
+        if actor == self.trackentry:
+            if not self.trackbutton.get_active():
+                self.trackbutton.set_active(True)
+        if actor == self.discentry:
+            if not self.discbutton.get_active():
+                self.discbutton.set_active(True)
+        if actor == self.yearentry:
+            if not self.yearbutton.get_active():
+                self.yearbutton.set_active(True)
+        if actor == self.commententry:
+            if not self.commentbutton.get_active():
+                self.commentbutton.set_active(True)
 
     def quit(self, *args):
         """ stop the process thread and close the program"""
