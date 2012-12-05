@@ -433,7 +433,7 @@ class MYTAG(object):
         """ connect all the window wisgets """
         # main window actions
         self.window.connect("destroy", self.quit)
-        self.window.connect("key-release-event", self.savecatch)
+        self.window.connect("key-release-event", self.shortcatch)
         self.folderview.connect("key-press-event", self.keypress)
         self.fileview.connect("key-press-event", self.keypress)
         self.titleentry.connect("key-press-event", self.entrycatch)
@@ -612,11 +612,18 @@ class MYTAG(object):
         if event.get_keycode()[1] == 22:
             self.goback()
 
-    def savecatch(self, actor, event):
-        """ capture keys to save tags """
+    def shortcatch(self, actor, event):
+        """ capture keys for shortcuts """
         if event.get_state() and Gdk.ModifierType.CONTROL_MASK:
             if event.get_keycode()[1] == 39:
                 self.savetags()
+            if event.get_keycode()[1] == 46:
+                self.loadselection()
+            if event.get_keycode()[1] == 56:
+                self.goback()
+            if event.get_keycode()[1] == 43:
+                self.gohome()
+
 
     def entrycatch(self, actor, event):
         """ capture key presses to activate checkboxes """
