@@ -22,7 +22,7 @@ Features other taggers don't have
 
 Recent Updates
 --------------
- * Added ctrl + s to save current tags
+ * Added ctrl + s/l/b/h to save current tags
  * Automatically tick checkboxes when typing in tag fields
  * Added backspace to folder navigation (go back one folder)
  * Corrected threading for GTK3 programs
@@ -55,6 +55,14 @@ No album artist set:
  * Output: /music/Filter & the Crystal Method/1997 Spawn/1-01 - Can't You (Trip Like I Do).mp3
 Set Album Artist to 'Various':
  * Output: /music/Various/1997 Spawn/1-01 - Can't You (Trip Like I Do).mp3
+
+
+Shortcuts
+---------
+ctrl + b - Go back one folder
+ctrl + h - Go to home folder
+ctrl + l - Load current selection
+ctrl + s - Save current tag changes
 
 
 Requires
