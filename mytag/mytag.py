@@ -806,6 +806,7 @@ class MYTAG(object):
                 if tmp_year != None and tmp_year != current_year:
                     item.setTextFrame('TDRC', tmp_year)
                     item.setTextFrame('TDRL', tmp_year)
+                    item.setTextFrame('TYER', tmp_year)
                 if tmp_comment != None and tmp_comment != current_comment:
                     item.removeComments()
                     item.addComment(tmp_comment)
