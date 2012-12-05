@@ -1,7 +1,7 @@
 ---------------------------------------------
 mytag: Python music tagger and file organiser
 ---------------------------------------------
-v1.1 - 20121128
+v1.x - Development
 
 Why do this?
 ------------
@@ -22,6 +22,8 @@ Features other taggers don't have
 
 Recent Updates
 --------------
+ * Added ctrl + s to save current tags
+ * Automatically tick checkboxes when typing in tag fields
  * Added backspace to folder navigation (go back one folder)
  * Corrected threading for GTK3 programs
  * UI and code structure updates

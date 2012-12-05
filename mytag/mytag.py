@@ -29,6 +29,7 @@ import ConfigParser
 import sys
 
 from gi.repository import Gtk
+from gi.repository import Gdk
 from gi.repository import GLib
 
 from xdg.BaseDirectory import xdg_config_dirs
@@ -432,6 +433,7 @@ class MYTAG(object):
         """ connect all the window wisgets """
         # main window actions
         self.window.connect("destroy", self.quit)
+        self.window.connect("key-release-event", self.savecatch)
         self.folderview.connect("key-press-event", self.keypress)
         self.titleentry.connect("key-press-event", self.entrycatch)
         self.artistentry.connect("key-press-event", self.entrycatch)
@@ -609,9 +611,15 @@ class MYTAG(object):
         if event.get_keycode()[1] == 22:
             self.goback()
 
+    def savecatch(self, actor, event):
+        """ capture keys to save tags """
+        if event.get_state() and Gdk.ModifierType.CONTROL_MASK:
+            if event.get_keycode()[1] == 39:
+                self.savetags()
+
     def entrycatch(self, actor, event):
         """ capture key presses to activate checkboxes """
-        movement_keys = [23, 111, 113, 114, 116]
+        movement_keys = [22, 23, 111, 113, 114, 116]
         if not event.get_keycode()[1] in movement_keys:
             if actor == self.titleentry:
                 if not self.titlebutton.get_active():
