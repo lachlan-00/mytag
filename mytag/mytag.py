@@ -435,6 +435,7 @@ class MYTAG(object):
         self.window.connect("destroy", self.quit)
         self.window.connect("key-release-event", self.savecatch)
         self.folderview.connect("key-press-event", self.keypress)
+        self.fileview.connect("key-press-event", self.keypress)
         self.titleentry.connect("key-press-event", self.entrycatch)
         self.artistentry.connect("key-press-event", self.entrycatch)
         self.albumentry.connect("key-press-event", self.entrycatch)
@@ -622,6 +623,7 @@ class MYTAG(object):
         movement_keys = [22, 23, 36, 37, 50, 62, 64, 65, 66,
                             105, 108, 110, 111, 112, 113,
                             114, 115, 116, 117, 118, 119]
+        # only set active when not using movement keys
         if not event.get_keycode()[1] in movement_keys:
             if actor == self.titleentry:
                 if not self.titlebutton.get_active():
