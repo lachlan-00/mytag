@@ -337,11 +337,16 @@ class MYTAG(object):
     """ browse folders and set tags using ui """
     def __init__(self):
         """ start mytag """
-        if not TAG_SUPPORT:
-            raise Exception('Please install python-eyed3')
         self.builder = Gtk.Builder()
         self.builder.add_from_file("/usr/share/mytag/main.ui")
         self.builder.connect_signals(self)
+        if TAG_SUPPORT:
+            error = self.builder.get_object("popup_window")
+            closeerror = self.builder.get_object("closepop")
+            closeerror.connect("clicked", self.closeerror)
+            error.set_markup('Please install python-eyed3')
+            error.show()
+            raise Exception('Please install python-eyed3')
         self.worker = None
         if not self.worker:
             self.worker = WorkerThread(self)
@@ -563,6 +568,11 @@ class MYTAG(object):
     def closeconf(self, *args):
         """ hide the config window """
         self.confwindow.hide()
+        return
+
+    def closeerror(self, *args):
+        """ hide the error window """
+        self.popwindow.destroy()
         return
 
     def closepop(self, *args):
