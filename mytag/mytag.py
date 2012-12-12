@@ -970,6 +970,7 @@ class MYTAG(object):
     def listfolder(self, *args):
         """ function to list the folder column """
         self.current_dir = args[0]
+        self.current_dir = self.current_dir.replace('//', '/')
         self.currentdirlabel.set_text('Current Folder: ' +
                                       str(os.path.normpath(self.current_dir)))
         if not type(args[0]) == type(''):
