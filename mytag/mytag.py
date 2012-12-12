@@ -344,7 +344,7 @@ class MYTAG(object):
             self.popwindow = self.builder.get_object("popup_window")
             closeerror = self.builder.get_object("closepop")
             closeerror.connect("clicked", self.closeerror)
-            self.popwindow.set_markup('Please install python-eyed3')
+            self.popwindow.set_markup('MYTAG ERROR: Please install python-eyed3')
             self.popwindow.show()
             Gtk.main()
         else:
