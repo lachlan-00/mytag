@@ -340,99 +340,100 @@ class MYTAG(object):
         self.builder = Gtk.Builder()
         self.builder.add_from_file("/usr/share/mytag/main.ui")
         self.builder.connect_signals(self)
-        if TAG_SUPPORT:
-            error = self.builder.get_object("popup_window")
+        if not TAG_SUPPORT:
+            self.popwindow = self.builder.get_object("popup_window")
             closeerror = self.builder.get_object("closepop")
             closeerror.connect("clicked", self.closeerror)
-            error.set_markup('Please install python-eyed3')
-            error.show()
-            raise Exception('Please install python-eyed3')
-        self.worker = None
-        if not self.worker:
-            self.worker = WorkerThread(self)
-        # get config info
-        self.checkconfig()
-        self.conf = ConfigParser.RawConfigParser()
-        self.conf.read(CONFIG)
-        self.homefolder = self.conf.get('conf', 'home')
-        self.library = self.conf.get('conf', 'defaultlibrary')
-        self.libraryformat = self.conf.get('conf', 'outputstyle')
-        # backwards compatability for new config options
-        try:
-            self.stoponerror = self.conf.get('conf', 'stoponerror')
-        except ConfigParser.NoOptionError:
-            self.stoponerror = 'True'
-        try:
-            self.movenonmedia = self.conf.get('conf', 'movenonmedia')
-        except ConfigParser.NoOptionError:
-            self.movenonmedia = 'True'
-        self.current_dir = self.homefolder
-        self.current_files = None
-        self.filelist = None
-        # load main window items
-        self.window = self.builder.get_object("main_window")
-        self.settingsbutton = self.builder.get_object("settingsbutton")
-        self.editbutton = self.builder.get_object("editbutton")
-        self.backbutton = self.builder.get_object("backbutton")
-        self.homebutton = self.builder.get_object("homebutton")
-        self.gobutton = self.builder.get_object("gobutton")
-        self.organisebutton = self.builder.get_object('organisebutton')
-        self.folderlist = self.builder.get_object('folderstore')
-        self.folderview = self.builder.get_object("folderview")
-        self.fileview = self.builder.get_object("fileview")
-        self.contentlist = self.builder.get_object('filestore')
-        self.contenttree = self.builder.get_object('fileview')
-        self.titlebutton = self.builder.get_object('titlebutton')
-        self.artistbutton = self.builder.get_object('artistbutton')
-        self.albumbutton = self.builder.get_object('albumbutton')
-        self.albumartistbutton = self.builder.get_object('albumartistbutton')
-        self.genrebutton = self.builder.get_object('genrebutton')
-        self.trackbutton = self.builder.get_object('trackbutton')
-        self.discbutton = self.builder.get_object('discbutton')
-        self.yearbutton = self.builder.get_object('yearbutton')
-        self.commentbutton = self.builder.get_object('commentbutton')
-        self.titleentry = self.builder.get_object('titleentry')
-        self.artistentry = self.builder.get_object('artistentry')
-        self.albumentry = self.builder.get_object('albumentry')
-        self.albumartistentry = self.builder.get_object('albumartistentry')
-        self.genreentry = self.builder.get_object('genreentry')
-        self.trackentry = self.builder.get_object('trackentry')
-        self.discentry = self.builder.get_object('discentry')
-        self.yearentry = self.builder.get_object('yearentry')
-        self.commententry = self.builder.get_object('commententry')
-        self.tagimage = self.builder.get_object('tagimage')
-        self.currentdirlabel = self.builder.get_object('currentdirlabel')
-        # load config window items
-        self.confwindow = self.builder.get_object("config_window")
-        self.libraryentry = self.builder.get_object('libraryentry')
-        self.styleentry = self.builder.get_object('styleentry')
-        self.homeentry = self.builder.get_object('homeentry')
-        self.errorcheck = self.builder.get_object('errorcheck')
-        self.mediacheck = self.builder.get_object('nonmediacheck')
-        self.applybutton = self.builder.get_object("applyconf")
-        self.closebutton = self.builder.get_object("closeconf")
-        # load popup window items
-        self.popwindow = self.builder.get_object("popup_window")
-        self.popbutton = self.builder.get_object("closepop")
-        self.successwindow = self.builder.get_object("success_window")
-        self.successbutton = self.builder.get_object("closesuccess")
-        # set tag items
-        self.title = None
-        self.artist = None
-        self.album = None
-        self.albumartist = None
-        self.genre = None
-        self.track = None
-        self.disc = None
-        self.year = None
-        self.comment = None
-        self.tracklist = None
-        self.trackselection = None
-        self.uibuttons = None
-        # create lists and connect actions
-        self.loadlists()
-        self.connectui()
-        self.run()
+            self.popwindow.set_markup('Please install python-eyed3')
+            self.popwindow.show()
+            Gtk.main()
+        else:
+            self.worker = None
+            if not self.worker:
+                self.worker = WorkerThread(self)
+            # get config info
+            self.checkconfig()
+            self.conf = ConfigParser.RawConfigParser()
+            self.conf.read(CONFIG)
+            self.homefolder = self.conf.get('conf', 'home')
+            self.library = self.conf.get('conf', 'defaultlibrary')
+            self.libraryformat = self.conf.get('conf', 'outputstyle')
+            # backwards compatability for new config options
+            try:
+                self.stoponerror = self.conf.get('conf', 'stoponerror')
+            except ConfigParser.NoOptionError:
+                self.stoponerror = 'True'
+            try:
+                self.movenonmedia = self.conf.get('conf', 'movenonmedia')
+            except ConfigParser.NoOptionError:
+                self.movenonmedia = 'True'
+            self.current_dir = self.homefolder
+            self.current_files = None
+            self.filelist = None
+            # load main window items
+            self.window = self.builder.get_object("main_window")
+            self.settingsbutton = self.builder.get_object("settingsbutton")
+            self.editbutton = self.builder.get_object("editbutton")
+            self.backbutton = self.builder.get_object("backbutton")
+            self.homebutton = self.builder.get_object("homebutton")
+            self.gobutton = self.builder.get_object("gobutton")
+            self.organisebutton = self.builder.get_object('organisebutton')
+            self.folderlist = self.builder.get_object('folderstore')
+            self.folderview = self.builder.get_object("folderview")
+            self.fileview = self.builder.get_object("fileview")
+            self.contentlist = self.builder.get_object('filestore')
+            self.contenttree = self.builder.get_object('fileview')
+            self.titlebutton = self.builder.get_object('titlebutton')
+            self.artistbutton = self.builder.get_object('artistbutton')
+            self.albumbutton = self.builder.get_object('albumbutton')
+            self.albumartistbutton = self.builder.get_object('albumartistbutton')
+            self.genrebutton = self.builder.get_object('genrebutton')
+            self.trackbutton = self.builder.get_object('trackbutton')
+            self.discbutton = self.builder.get_object('discbutton')
+            self.yearbutton = self.builder.get_object('yearbutton')
+            self.commentbutton = self.builder.get_object('commentbutton')
+            self.titleentry = self.builder.get_object('titleentry')
+            self.artistentry = self.builder.get_object('artistentry')
+            self.albumentry = self.builder.get_object('albumentry')
+            self.albumartistentry = self.builder.get_object('albumartistentry')
+            self.genreentry = self.builder.get_object('genreentry')
+            self.trackentry = self.builder.get_object('trackentry')
+            self.discentry = self.builder.get_object('discentry')
+            self.yearentry = self.builder.get_object('yearentry')
+            self.commententry = self.builder.get_object('commententry')
+            self.tagimage = self.builder.get_object('tagimage')
+            self.currentdirlabel = self.builder.get_object('currentdirlabel')
+            # load config window items
+            self.confwindow = self.builder.get_object("config_window")
+            self.libraryentry = self.builder.get_object('libraryentry')
+            self.styleentry = self.builder.get_object('styleentry')
+            self.homeentry = self.builder.get_object('homeentry')
+            self.errorcheck = self.builder.get_object('errorcheck')
+            self.mediacheck = self.builder.get_object('nonmediacheck')
+            self.applybutton = self.builder.get_object("applyconf")
+            self.closebutton = self.builder.get_object("closeconf")
+            # load popup window items
+            self.popwindow = self.builder.get_object("popup_window")
+            self.popbutton = self.builder.get_object("closepop")
+            self.successwindow = self.builder.get_object("success_window")
+            self.successbutton = self.builder.get_object("closesuccess")
+            # set tag items
+            self.title = None
+            self.artist = None
+            self.album = None
+            self.albumartist = None
+            self.genre = None
+            self.track = None
+            self.disc = None
+            self.year = None
+            self.comment = None
+            self.tracklist = None
+            self.trackselection = None
+            self.uibuttons = None
+            # create lists and connect actions
+            self.loadlists()
+            self.connectui()
+            self.run()
 
     def connectui(self):
         """ connect all the window wisgets """
@@ -573,6 +574,8 @@ class MYTAG(object):
     def closeerror(self, *args):
         """ hide the error window """
         self.popwindow.destroy()
+        Gtk.main_quit(*args)
+        raise Exception('Please install python-eyed3')
         return
 
     def closepop(self, *args):
