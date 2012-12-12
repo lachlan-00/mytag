@@ -614,7 +614,9 @@ class MYTAG(object):
 
     def shortcatch(self, actor, event):
         """ capture keys for shortcuts """
-        if event.get_state() and Gdk.ModifierType.CONTROL_MASK:
+        test_mask = (event.state & Gdk.ModifierType.CONTROL_MASK ==
+                       Gdk.ModifierType.CONTROL_MASK)
+        if event.get_state() and test_mask:
             if event.get_keycode()[1] == 39:
                 self.savetags()
             if event.get_keycode()[1] == 46:
@@ -630,9 +632,10 @@ class MYTAG(object):
         movement_keys = [22, 23, 36, 37, 50, 62, 64, 65, 66,
                             105, 108, 110, 111, 112, 113,
                             114, 115, 116, 117, 118, 119]
-        mask_test = Gdk.ModifierType.CONTROL_MASK
+        test_mask = (event.state & Gdk.ModifierType.CONTROL_MASK ==
+                       Gdk.ModifierType.CONTROL_MASK)
         # only set active when not using movement keys
-        if not even.get_keycode()[1] in movement_keys and not mack_test:
+        if not event.get_keycode()[1] in movement_keys and not test_mask:
             if actor == self.titleentry:
                 if not self.titlebutton.get_active():
                     self.titlebutton.set_active(True)
