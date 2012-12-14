@@ -1,7 +1,7 @@
 ---------------------------------------------
 mytag: Python music tagger and file organiser
 ---------------------------------------------
-v1.x - Development
+v1.2 - 14122012
 
 Why do this?
 ------------
@@ -22,7 +22,7 @@ Features other taggers don't have
 
 Recent Updates
 --------------
- * Added ctrl + s/l/b/h to save current tags
+ * Added ctrl + s/l/b/h shortcuts
  * Automatically tick checkboxes when typing in tag fields
  * Added backspace to folder navigation (go back one folder)
  * Corrected threading for GTK3 programs
