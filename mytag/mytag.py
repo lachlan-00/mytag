@@ -243,10 +243,7 @@ class WorkerThread(threading.Thread):
             item.link(files)
             item.setVersion(eyeD3.ID3_V2_4)
             item.setTextEncoding(eyeD3.UTF_8_ENCODING)
-        except Exception, err:
-            print 'line 244'
-            print type(err)
-            print err
+        except:
             # Tag error
             item = None
         # pull tag info for the current item
@@ -344,7 +341,8 @@ class MYTAG(object):
             self.popwindow = self.builder.get_object("popup_window")
             closeerror = self.builder.get_object("closepop")
             closeerror.connect("clicked", self.closeerror)
-            self.popwindow.set_markup('MYTAG ERROR: Please install python-eyed3')
+            self.popwindow.set_markup('MYTAG ERROR: Please install' +
+                                        ' python-eyed3')
             self.popwindow.show()
             Gtk.main()
         else:
@@ -386,7 +384,8 @@ class MYTAG(object):
             self.titlebutton = self.builder.get_object('titlebutton')
             self.artistbutton = self.builder.get_object('artistbutton')
             self.albumbutton = self.builder.get_object('albumbutton')
-            self.albumartistbutton = self.builder.get_object('albumartistbutton')
+            self.albumartistbutton = self.builder.get_object('albumart' +
+                                                                'istbutton')
             self.genrebutton = self.builder.get_object('genrebutton')
             self.trackbutton = self.builder.get_object('trackbutton')
             self.discbutton = self.builder.get_object('discbutton')
@@ -395,7 +394,8 @@ class MYTAG(object):
             self.titleentry = self.builder.get_object('titleentry')
             self.artistentry = self.builder.get_object('artistentry')
             self.albumentry = self.builder.get_object('albumentry')
-            self.albumartistentry = self.builder.get_object('albumartistentry')
+            self.albumartistentry = self.builder.get_object('albumart' +
+                                                                'istentry')
             self.genreentry = self.builder.get_object('genreentry')
             self.trackentry = self.builder.get_object('trackentry')
             self.discentry = self.builder.get_object('discentry')
@@ -742,10 +742,7 @@ class MYTAG(object):
                 item.link(files)
                 item.setVersion(eyeD3.ID3_V2_4)
                 item.setTextEncoding(eyeD3.UTF_8_ENCODING)
-            except Exception, err:
-                print 'line 661'
-                print type(err)
-                print err
+            except:
                 item = None
                 save_fail = True
             if item:
@@ -837,10 +834,7 @@ class MYTAG(object):
                 try:
                     # write changes to file
                     item.update(eyeD3.ID3_V2_4)
-                except Exception, err:
-                    print 'line 755'
-                    print type(err)
-                    print err
+                except:
                     self.tagimage.set_from_file(ICON_DIR +
                                                 '16x16/emotes/face-crying.png')
                     save_fail = True
@@ -874,10 +868,7 @@ class MYTAG(object):
                 item.link(musicfiles)
                 item.setVersion(eyeD3.ID3_V2_4)
                 item.setTextEncoding(eyeD3.UTF_8_ENCODING)
-            except Exception, err:
-                print 'line 795'
-                print type(err)
-                print err
+            except:
                 # Tag error
                 item = None
             # pull tag info per item
