@@ -123,6 +123,8 @@ class WorkerThread(threading.Thread):
             return False
         # search for files and folders in the current dir
         for items in tmpsort:
+            while Gtk.events_pending():
+                Gtk.main_iteration()
             if not self.stop:
                 try:
                     path = os.path.normpath((folder).decode('utf-8') + u'/' +
@@ -166,6 +168,8 @@ class WorkerThread(threading.Thread):
                     self.stop = True
                 return False
         if not files == currentdestin:
+            while Gtk.events_pending():
+                Gtk.main_iteration()
             # create a backup when conflicts are found
             if os.path.isfile(currentdestin):
                 backupdestin = os.path.normpath(self.backupdir + '/' +
@@ -211,6 +215,8 @@ class WorkerThread(threading.Thread):
             if self.movemedia:
                 # move non-media when no other media files are in the folder
                 for files in tmp_dir:
+                    while Gtk.events_pending():
+                        Gtk.main_iteration()
                     filelist = files[(files.rfind('.')):]
                     if not found_media and not os.path.isdir(sourcedir +
                                                                '/' + files):
@@ -326,6 +332,8 @@ class WorkerThread(threading.Thread):
             if tmp_comment:
                 destin = destin.replace('%comment%', tmp_comment)
             destin = destin + files[(files.rfind('.')):]
+            while Gtk.events_pending():
+                Gtk.main_iteration()
             return destin
         return
 
