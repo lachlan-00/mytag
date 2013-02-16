@@ -109,9 +109,11 @@
             <child>
               <object class="GtkCheckButton" id="errorcheck">
                 <property name="label" translatable="yes">Stop organising when missing tag found</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
+                <property name="use_action_appearance">False</property>
                 <property name="xalign">0</property>
                 <property name="draw_indicator">True</property>
               </object>
@@ -125,9 +127,11 @@
             <child>
               <object class="GtkCheckButton" id="nonmediacheck">
                 <property name="label" translatable="yes">Move non-media files with last media file</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
+                <property name="use_action_appearance">False</property>
                 <property name="xalign">0</property>
                 <property name="draw_indicator">True</property>
               </object>
@@ -169,9 +173,11 @@
             </child>
             <child>
               <object class="GtkButton" id="applyconf">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <child>
                   <object class="GtkImage" id="savebuttonimage">
                     <property name="visible">True</property>
@@ -189,9 +195,11 @@
             </child>
             <child>
               <object class="GtkButton" id="closeconf">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <child>
                   <object class="GtkImage" id="quitimage1">
                     <property name="visible">True</property>
@@ -235,6 +243,7 @@
     <property name="default_width">900</property>
     <property name="default_height">600</property>
     <property name="hide_titlebar_when_maximized">True</property>
+    <property name="icon">/usr/share/pixmaps/mytag.png</property>
     <child>
       <object class="GtkBox" id="mainbox1">
         <property name="visible">True</property>
@@ -259,9 +268,11 @@
             </child>
             <child>
               <object class="GtkButton" id="settingsbutton">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <child>
                   <object class="GtkImage" id="settingsimage">
                     <property name="visible">True</property>
@@ -308,10 +319,12 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="editbutton">
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Edit the selected files</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="image_position">right</property>
                     <child>
                       <object class="GtkImage" id="loadimage">
@@ -383,10 +396,12 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="backbutton">
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Go back one folder</property>
+                    <property name="use_action_appearance">False</property>
                     <child>
                       <object class="GtkImage" id="backimage">
                         <property name="visible">True</property>
@@ -403,10 +418,12 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="homebutton">
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Go to your home folder</property>
+                    <property name="use_action_appearance">False</property>
                     <child>
                       <object class="GtkImage" id="homeimage">
                         <property name="visible">True</property>
@@ -442,9 +459,11 @@
                     <child>
                       <object class="GtkCheckButton" id="titlebutton">
                         <property name="label" translatable="yes">title</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -458,9 +477,11 @@
                     <child>
                       <object class="GtkCheckButton" id="artistbutton">
                         <property name="label" translatable="yes">Artist</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -474,9 +495,11 @@
                     <child>
                       <object class="GtkCheckButton" id="albumbutton">
                         <property name="label" translatable="yes">Album</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -490,10 +513,12 @@
                     <child>
                       <object class="GtkCheckButton" id="albumartistbutton">
                         <property name="label" translatable="yes">Album Artist</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="hexpand">True</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -507,9 +532,11 @@
                     <child>
                       <object class="GtkCheckButton" id="genrebutton">
                         <property name="label" translatable="yes">Genre</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -523,9 +550,11 @@
                     <child>
                       <object class="GtkCheckButton" id="trackbutton">
                         <property name="label" translatable="yes">Track</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -539,9 +568,11 @@
                     <child>
                       <object class="GtkCheckButton" id="discbutton">
                         <property name="label" translatable="yes">Disc</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -555,9 +586,11 @@
                     <child>
                       <object class="GtkCheckButton" id="yearbutton">
                         <property name="label" translatable="yes">Year</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -571,9 +604,11 @@
                     <child>
                       <object class="GtkCheckButton" id="commentbutton">
                         <property name="label" translatable="yes">Comment</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="relief">none</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
@@ -837,10 +872,12 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="gobutton">
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Save tag changes</property>
+                    <property name="use_action_appearance">False</property>
                     <child>
                       <object class="GtkImage" id="image1">
                         <property name="visible">True</property>
@@ -882,10 +919,12 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="organisebutton">
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Organise all files in your current folder</property>
+                    <property name="use_action_appearance">False</property>
                     <child>
                       <object class="GtkImage" id="image3">
                         <property name="visible">True</property>
@@ -992,9 +1031,11 @@
             </child>
             <child>
               <object class="GtkButton" id="closepop">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <child>
                   <object class="GtkImage" id="quitimage2">
                     <property name="visible">True</property>
@@ -1045,9 +1086,11 @@
             </child>
             <child>
               <object class="GtkButton" id="closesuccess">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <child>
                   <object class="GtkImage" id="quitimage3">
                     <property name="visible">True</property>
