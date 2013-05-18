@@ -568,7 +568,7 @@ class MYTAG(object):
             conffile = open(CONFIG, "w")
             conffile.write("[conf]\nhome = " + os.getenv('HOME') +
                        "\ndefaultlibrary = " + os.getenv('HOME') +
-                       "\noutputstyle = %albumartist%/(%year%)" +
+                       "\noutputstyle = %albumartist%/(%year%) " +
                        "%album%/%disc%%track% - %title%\n" +
                        "stoponerror = True\nmovenonmedia = True\n")
             conffile.close()
