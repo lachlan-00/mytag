@@ -36,7 +36,7 @@ from xdg.BaseDirectory import xdg_config_dirs
 
 # python-eyeD3 required for editing and loading tags
 try:
-    import eyeD3
+    import eyed3 as eyeD3
     TAG_SUPPORT = True
 except ImportError:
     TAG_SUPPORT = False
