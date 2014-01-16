@@ -39,7 +39,11 @@ try:
     import eyed3 as eyeD3
     TAG_SUPPORT = True
 except ImportError:
-    TAG_SUPPORT = False
+    try:
+        import eyeD3 
+        TAG_SUPPORT = True
+    except ImportError:
+        TAG_SUPPORT = False
 
 # quit if using python3
 if sys.version[0] == 3:
