@@ -36,10 +36,14 @@ from xdg.BaseDirectory import xdg_config_dirs
 
 # python-eyeD3 required for editing and loading tags
 try:
-    import eyeD3
+    import eyed3 as eyeD3
     TAG_SUPPORT = True
 except ImportError:
-    TAG_SUPPORT = False
+    try:
+        import eyeD3 
+        TAG_SUPPORT = True
+    except ImportError:
+        TAG_SUPPORT = False
 
 # quit if using python3
 if sys.version[0] == 3:
@@ -142,7 +146,12 @@ class WorkerThread(threading.Thread):
                     # remove '.mediaartlocal' folders
                     if os.path.basename(path) == '.mediaartlocal':
                         for items in os.listdir(path):
-                            os.remove(os.path.join(path + u'/' + items))
+                            try:
+                                os.remove(os.path.join(path + u'/' + items))
+                            except OSError:
+                                self.returntext = 'permissions'
+                                self.stop = True
+                                return
                         os.rmdir(path)
                     else:
                         # search subfolder for media
@@ -191,7 +200,12 @@ class WorkerThread(threading.Thread):
                 if not os.path.isdir(os.path.dirname(currentdestin)):
                     os.makedirs(os.path.dirname(currentdestin))
                 # move file and run cleanup
-                shutil.move(files, currentdestin)
+                try:
+                    shutil.move(files, currentdestin)
+                except OSError:
+                    self.returntext = 'permissions'
+                    self.stop = True
+                    return
                 self.folder_cleanup(files, currentdestin)
         return
 
@@ -700,15 +714,24 @@ class MYTAG(object):
                                        self.stoponerror, self.movenonmedia)
         # notify for different errors
         if type(returnstring) == type(''):
-            self.popwindow.set_markup('Error: Opening ' + returnstring)
-            self.popwindow.show()
-            self.listfolder(self.current_dir)
+            if returnstring == 'permissions':
+                self.popwindow.set_markup('Error: Unable to modify folder.' +
+                                          ' Check Permissions')
+                self.popwindow.show()
+                self.listfolder(self.current_dir)
+                return False
+            else:
+                self.popwindow.set_markup('Error: Opening ' + returnstring)
+                self.popwindow.show()
+                self.listfolder(self.current_dir)
+                return False
         if type(returnstring) == type([]):
             self.popwindow.set_markup('Error: ' + returnstring[0] +
                                       ' missing')
             self.popwindow.format_secondary_text(returnstring[1])
             self.popwindow.show()
             self.listfolder(self.current_dir)
+            return False
         else:
             self.successwindow.show()
             if not os.path.isdir(self.current_dir):
