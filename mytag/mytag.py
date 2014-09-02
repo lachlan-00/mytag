@@ -314,7 +314,7 @@ class WorkerThread(threading.Thread):
             if tmp_disc:
                 if '/' in tmp_disc:
                     tmp_disc = tmp_disc.split('/')[0]
-                if len(tmp_disc) == 2:
+                if len(tmp_disc) == 2 and tmp_disk <= 9:
                     tmp_disc = tmp_disc[-1]
             tmp_year = item.getYear()
             if tmp_year == 'None':
@@ -813,7 +813,7 @@ class MYTAG(object):
                 if current_disc:
                     if '/' in current_disc:
                         current_disc = current_disc.split('/')[0]
-                    if len(current_disc) == 2:
+                    if len(current_disc) == 2 and current_disc <= 9:
                         current_disc = current_disc[-1]
                 current_year = item.getYear()
                 current_comment = item.getComment()
@@ -942,7 +942,7 @@ class MYTAG(object):
                 if tmp_disc:
                     if '/' in tmp_disc:
                         tmp_disc = tmp_disc.split('/')[0]
-                    if len(tmp_disc) == 2:
+                    if len(tmp_disc) == 2 and tmp_disc <= 9:
                         tmp_disc = tmp_disc[-1]
                 tmp_year = item.getYear()
                 if tmp_year == 'None':
