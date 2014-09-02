@@ -165,9 +165,12 @@ class WorkerThread(threading.Thread):
     def organisefiles(self, files):
         """ sort media when found """
         # set output path and fill variables with the tag value
+        stringtest = False
         currentdestin = os.path.normpath(self.destin + u'/' + self.destinformat)
         currentdestin = self.fill_string(files, currentdestin)
-        stringtest = False
+        # ignore missing tags
+        if not currentdestin:
+            return False
         for tags in MUSIC_TAGS:
             # if a tag variable is found in the output do not continue
             if tags in currentdestin:
