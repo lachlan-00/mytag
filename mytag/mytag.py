@@ -318,7 +318,7 @@ class WorkerThread(threading.Thread):
             if tmp_disc:
                 if '/' in tmp_disc:
                     tmp_disc = tmp_disc.split('/')[0]
-                if len(tmp_disc) == 2 and tmp_disk <= 9:
+                if len(tmp_disc) == 2 and tmp_disc <= 9:
                     tmp_disc = tmp_disc[-1]
             tmp_year = item.getYear()
             if tmp_year == 'None':
@@ -753,7 +753,7 @@ class MYTAG(object):
         if type(returnstring) == type([]):
             Notify.init('mytag')
             title = 'mytag'
-            note = 'ERROR: ' + returnstring[0] + ' missing'
+            note = 'ERROR: ' + returnstring[0] + ' missing. ' + returnstring[1]
             notification = Notify.Notification.new(title, note, ICON_DIR + '24x24/status/error.png')
             Notify.Notification.show(notification)
             #self.popwindow.set_markup('Error: ' + returnstring[0] +
