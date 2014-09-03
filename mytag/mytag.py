@@ -31,6 +31,7 @@ import sys
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GLib
+from gi.repository import Notify
 
 from xdg.BaseDirectory import xdg_config_dirs
 
@@ -170,7 +171,7 @@ class WorkerThread(threading.Thread):
         currentdestin = self.fill_string(files, currentdestin)
         # ignore missing tags
         if not currentdestin:
-            return False
+            return 'permissions'
         for tags in MUSIC_TAGS:
             # if a tag variable is found in the output do not continue
             if tags in currentdestin:
@@ -363,12 +364,17 @@ class MYTAG(object):
         self.builder.add_from_file("/usr/share/mytag/main.ui")
         self.builder.connect_signals(self)
         if not TAG_SUPPORT:
-            self.popwindow = self.builder.get_object("popup_window")
-            closeerror = self.builder.get_object("closepop")
-            closeerror.connect("clicked", self.closeerror)
-            self.popwindow.set_markup('MYTAG ERROR: Please install' +
-                                        ' python-eyed3')
-            self.popwindow.show()
+            Notify.init('mytag')
+            title = 'mytag'
+            note = 'ERROR: install python-eyed3'
+            notification = Notify.Notification.new(title, note, None)
+            Notify.Notification.show(notification)
+            #self.popwindow = self.builder.get_object("popup_window")
+            #closeerror = self.builder.get_object("closepop")
+            #closeerror.connect("clicked", self.closeerror)
+            #self.popwindow.set_markup('MYTAG ERROR: Please install' +
+            #                            ' python-eyed3')
+            #self.popwindow.show()
             Gtk.main()
         else:
             self.worker = None
@@ -427,6 +433,7 @@ class MYTAG(object):
             self.yearentry = self.builder.get_object('yearentry')
             self.commententry = self.builder.get_object('commententry')
             self.tagimage = self.builder.get_object('tagimage')
+            self.tagmsg = self.builder.get_object('errormsglabel')
             self.currentdirlabel = self.builder.get_object('currentdirlabel')
             # load config window items
             self.confwindow = self.builder.get_object("config_window")
@@ -577,6 +584,11 @@ class MYTAG(object):
         conffile = open(CONFIG, "w")
         self.conf.write(conffile)
         conffile.close()
+        Notify.init('mytag')
+        title = 'mytag'
+        note = 'CONFIG: Changes Saved'
+        notification = Notify.Notification.new(title, note, ICON_DIR + '24x24/actions/gtk-save.png')
+        Notify.Notification.show(notification)
         return
 
     def checkconfig(self):
@@ -718,25 +730,45 @@ class MYTAG(object):
         # notify for different errors
         if type(returnstring) == type(''):
             if returnstring == 'permissions':
-                self.popwindow.set_markup('Error: Unable to modify folder.' +
-                                          ' Check Permissions')
-                self.popwindow.show()
+                Notify.init('mytag')
+                title = 'mytag'
+                note = 'ERROR: Check Folder Permissions'
+                notification = Notify.Notification.new(title, note, ICON_DIR + '24x24/status/error.png')
+                Notify.Notification.show(notification)
+                #self.popwindow.set_markup('Error: Unable to modify folder.' +
+                #                          ' Check Permissions')
+                #self.popwindow.show()
                 self.listfolder(self.current_dir)
                 return False
             else:
-                self.popwindow.set_markup('Error: Opening ' + returnstring)
-                self.popwindow.show()
+                Notify.init('mytag')
+                title = 'mytag'
+                note = 'ERROR: Opening ' + returnstring
+                notification = Notify.Notification.new(title, note, ICON_DIR + '24x24/status/error.png')
+                Notify.Notification.show(notification)
+                #self.popwindow.set_markup('Error: Opening ' + returnstring)
+                #self.popwindow.show()
                 self.listfolder(self.current_dir)
                 return False
         if type(returnstring) == type([]):
-            self.popwindow.set_markup('Error: ' + returnstring[0] +
-                                      ' missing')
-            self.popwindow.format_secondary_text(returnstring[1])
-            self.popwindow.show()
+            Notify.init('mytag')
+            title = 'mytag'
+            note = 'ERROR: ' + returnstring[0] + ' missing'
+            notification = Notify.Notification.new(title, note, ICON_DIR + '24x24/status/error.png')
+            Notify.Notification.show(notification)
+            #self.popwindow.set_markup('Error: ' + returnstring[0] +
+            #                          ' missing')
+            #self.popwindow.format_secondary_text(returnstring[1])
+            #self.popwindow.show()
             self.listfolder(self.current_dir)
             return False
         else:
-            self.successwindow.show()
+            Notify.init('mytag')
+            title = 'mytag'
+            note = 'SUCCESS: Your files have been organised'
+            notification = Notify.Notification.new(title, note, ICON_DIR + '24x24/actions/filesave.png')
+            Notify.Notification.show(notification)
+            #self.successwindow.show()
             if not os.path.isdir(self.current_dir):
                 if os.path.isdir(os.path.dirname(self.current_dir)):
                     self.current_dir = os.path.dirname(self.current_dir)
@@ -868,6 +900,14 @@ class MYTAG(object):
                 try:
                     # write changes to file
                     item.update(eyeD3.ID3_V2_4)
+                except IOError:
+                    self.tagmsg.set_text('File Permission Error')
+                    self.tagimage.set_from_file(ICON_DIR +
+                                                '16x16/emotes/face-crying.png')
+                    save_fail = True
+                    print 'Tag Save Error'
+                    print files
+                    return False
                 except:
                     self.tagimage.set_from_file(ICON_DIR +
                                                 '16x16/emotes/face-crying.png')
@@ -1003,6 +1043,7 @@ class MYTAG(object):
             self.uibuttons[count][1].set_text('')
             count = count + 1
         self.tagimage.set_from_file(ICON_DIR + '16x16/emotes/face-plain.png')
+        self.tagmsg.set_text('')
         return
 
     def listfolder(self, *args):
