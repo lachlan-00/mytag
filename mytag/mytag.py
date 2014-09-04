@@ -905,15 +905,13 @@ class MYTAG(object):
                     self.tagimage.set_from_file(ICON_DIR +
                                                 '16x16/emotes/face-crying.png')
                     save_fail = True
-                    print 'Tag Save Error'
-                    print files
+                    print 'Tag Save Error ' + files
                     return False
                 except:
                     self.tagimage.set_from_file(ICON_DIR +
                                                 '16x16/emotes/face-crying.png')
                     save_fail = True
-                    print 'Tag Save Error'
-                    print files
+                    print 'Tag Save Error ' + files
                     return False
         # reload new tags after saving files
         self.loadtags(self.current_files)
@@ -926,8 +924,57 @@ class MYTAG(object):
         """ connect chosen files with tags """
         self.loadlists()
         self.clearopenfiles()
+        filelist = args[0]
+        # try to get disk/track by filenames
+        filenames = []
+        numericlist = ['1','2','3','4','5','6','7','8','9']
+        punctuationlist = [' ','.','-','_']
+        discfinder = None
+        discchanged = False
+        trackfinder = None
+        multipletracks = True
+        multipledisc = False
+        test_disc = None
+        # get the file basenames for checking
+        for musicfiles in filelist:
+            filenames.append(os.path.basename(musicfiles))
+        # for single files attempt to guess disk and track if missing
+        if len(filenames) == 1:
+            one = filenames[0][0]
+            two = filenames[0][1]
+            three = filenames[0][2]
+            four = filenames[0][3]
+            # possible no disc eg. "01.", "03-"
+            if one == '0' and two in numericlist and three in punctuationlist:
+                discfinder = '1'
+                trackfinder = one + two
+            # files with disc number "101-", etc
+            elif one in numericlist and (two in numericlist or two == '0') and three in numericlist  and four in punctuationlist:
+                discfinder = one
+                trackfinder = two + three
+            else:
+                discfinder = 'None'
+        # for whole lists only find disk and search track for each file
+        else:
+            for i in filenames:
+                one = i[0]
+                two = i[1]
+                three = i[2]
+                four = i[3]
+                # possible no disc eg. "01.", "03-"
+                if one == '0' and two in numericlist and three in punctuationlist:
+                    test_disc = '1'
+                # files with disc number "101-", etc
+                elif one in numericlist and (two in numericlist or two == '0') and three in numericlist  and four in punctuationlist:
+                    if not multipledisc:
+                        test_disc = one
+                        multipledisc = True
+                    elif one > test_disc:
+                        test_disc = 'None'
+            discfinder = test_disc
         # pull tags for each music file
-        for musicfiles in args[0]:
+        for musicfiles in filelist:
+            filename = os.path.basename(musicfiles)
             tmp_title = None
             tmp_artist = None
             tmp_album = None
@@ -971,7 +1018,10 @@ class MYTAG(object):
                         tmp_genre = tmp_genre.split(')')[1]
                 tmp_track = str(item.getTrackNum()[0])
                 if tmp_track == 'None':
-                    tmp_track = None
+                    if trackfinder:
+                        tmp_track = trackfinder
+                    else:
+                        tmp_track = None
                 if tmp_track:
                     if '/' in tmp_track:
                         tmp_track = tmp_track.split('/')[0]
@@ -980,6 +1030,10 @@ class MYTAG(object):
                     if len(tmp_track) > 2:
                         tmp_track = tmp_track[:2]
                 tmp_disc = str(item.getDiscNum()[0])
+                if discfinder and tmp_disc == 'None':
+                    print 'No Disc Tag'
+                    discchanged = True
+                    tmp_disc = discfinder
                 if tmp_disc == 'None':
                     tmp_disc = None
                 if tmp_disc:
@@ -1023,6 +1077,8 @@ class MYTAG(object):
                 self.uibuttons[count][0].set_active(True)
                 if types[0]:
                     self.uibuttons[count][1].set_text(types[0])
+                    if count == 6 and discchanged:
+                        self.uibuttons[count][0].set_active(False)
                 else:
                     self.uibuttons[count][0].set_active(False)
                     self.uibuttons[count][1].set_text('')
