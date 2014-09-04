@@ -419,6 +419,7 @@
               <object class="GtkBox" id="tagbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_right">3</property>
                 <property name="hexpand">False</property>
                 <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
@@ -750,6 +751,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="margin_left">3</property>
                         <property name="xalign">0.55000001192092896</property>
                         <child>
                           <object class="GtkImage" id="delimage1">
@@ -768,6 +770,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="margin_left">3</property>
                         <property name="xalign">0.55000001192092896</property>
                         <child>
                           <object class="GtkImage" id="delimage2">
@@ -786,6 +789,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="margin_left">3</property>
                         <property name="xalign">0.55000001192092896</property>
                         <child>
                           <object class="GtkImage" id="delimage3">
@@ -804,6 +808,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="margin_left">3</property>
                         <property name="xalign">0.55000001192092896</property>
                         <child>
                           <object class="GtkImage" id="delimage4">
@@ -822,6 +827,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="margin_left">3</property>
                         <property name="xalign">0.55000001192092896</property>
                         <child>
                           <object class="GtkImage" id="delimage5">
@@ -840,6 +846,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="margin_left">3</property>
                         <property name="xalign">0.55000001192092896</property>
                         <child>
                           <object class="GtkImage" id="delimage6">
@@ -858,6 +865,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="margin_left">3</property>
                         <property name="xalign">0.55000001192092896</property>
                         <child>
                           <object class="GtkImage" id="delimage7">
@@ -877,6 +885,7 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="valign">start</property>
+                        <property name="margin_left">3</property>
                         <property name="xalign">0.55000001192092896</property>
                         <child>
                           <object class="GtkImage" id="delimage8">
@@ -897,6 +906,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="margin_left">3</property>
                         <property name="xalign">0.55000001192092896</property>
                         <property name="image_position">bottom</property>
                         <child>
