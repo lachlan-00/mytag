@@ -419,6 +419,7 @@
               <object class="GtkBox" id="tagbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="hexpand">False</property>
                 <property name="vexpand">True</property>
                 <property name="orientation">vertical</property>
                 <child>
@@ -477,7 +478,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="hexpand">True</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -1026,14 +1026,13 @@
               <object class="GtkScrolledWindow" id="filescrolled">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
                 <property name="shadow_type">in</property>
                 <child>
                   <object class="GtkTreeView" id="fileview">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hexpand">True</property>
+                    <property name="hexpand">False</property>
                     <property name="vexpand">True</property>
                     <property name="model">filestore</property>
                     <property name="search_column">0</property>
