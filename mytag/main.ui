@@ -278,6 +278,7 @@
               <object class="GtkBox" id="loadbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_bottom">6</property>
                 <child>
                   <object class="GtkLabel" id="loadlabel">
                     <property name="width_request">190</property>
@@ -351,6 +352,7 @@
               <object class="GtkBox" id="choosebox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_bottom">6</property>
                 <child>
                   <object class="GtkLabel" id="chooselabel">
                     <property name="width_request">160</property>
@@ -743,10 +745,183 @@
                         <property name="top_attach">9</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkButton" id="clearbutton1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="xalign">0.55000001192092896</property>
+                        <child>
+                          <object class="GtkImage" id="delimage1">
+                            <property name="can_focus">False</property>
+                            <property name="pixbuf">/usr/share/icons/gnome/16x16/actions/edit-delete.png</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="clearbutton2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="xalign">0.55000001192092896</property>
+                        <child>
+                          <object class="GtkImage" id="delimage2">
+                            <property name="can_focus">False</property>
+                            <property name="pixbuf">/usr/share/icons/gnome/16x16/actions/edit-delete.png</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="clearbutton3">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="xalign">0.55000001192092896</property>
+                        <child>
+                          <object class="GtkImage" id="delimage3">
+                            <property name="can_focus">False</property>
+                            <property name="pixbuf">/usr/share/icons/gnome/16x16/actions/edit-delete.png</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="clearbutton4">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="xalign">0.55000001192092896</property>
+                        <child>
+                          <object class="GtkImage" id="delimage4">
+                            <property name="can_focus">False</property>
+                            <property name="pixbuf">/usr/share/icons/gnome/16x16/actions/edit-delete.png</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="clearbutton5">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="xalign">0.55000001192092896</property>
+                        <child>
+                          <object class="GtkImage" id="delimage5">
+                            <property name="can_focus">False</property>
+                            <property name="pixbuf">/usr/share/icons/gnome/16x16/actions/edit-delete.png</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="clearbutton6">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="xalign">0.55000001192092896</property>
+                        <child>
+                          <object class="GtkImage" id="delimage6">
+                            <property name="can_focus">False</property>
+                            <property name="pixbuf">/usr/share/icons/gnome/16x16/actions/edit-delete.png</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="clearbutton7">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="xalign">0.55000001192092896</property>
+                        <child>
+                          <object class="GtkImage" id="delimage7">
+                            <property name="can_focus">False</property>
+                            <property name="pixbuf">/usr/share/icons/gnome/16x16/actions/edit-delete.png</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="clearbutton8">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="valign">start</property>
+                        <property name="xalign">0.55000001192092896</property>
+                        <child>
+                          <object class="GtkImage" id="delimage8">
+                            <property name="width_request">16</property>
+                            <property name="height_request">-1</property>
+                            <property name="can_focus">False</property>
+                            <property name="pixbuf">/usr/share/icons/gnome/16x16/actions/edit-delete.png</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">7</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="clearbutton9">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="xalign">0.55000001192092896</property>
+                        <property name="image_position">bottom</property>
+                        <child>
+                          <object class="GtkImage" id="delimage9">
+                            <property name="can_focus">False</property>
+                            <property name="pixbuf">/usr/share/icons/gnome/16x16/actions/edit-delete.png</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">8</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
+                    <property name="padding">5</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
@@ -879,6 +1054,7 @@
               <object class="GtkBox" id="savebox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_bottom">6</property>
                 <child>
                   <object class="GtkLabel" id="tagslabel">
                     <property name="visible">True</property>

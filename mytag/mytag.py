@@ -435,6 +435,25 @@ class MYTAG(object):
             self.tagimage = self.builder.get_object('tagimage')
             self.tagmsg = self.builder.get_object('errormsglabel')
             self.currentdirlabel = self.builder.get_object('currentdirlabel')
+            self.deltitlebutton = self.builder.get_object('clearbutton1')
+            self.delartistbutton = self.builder.get_object('clearbutton2')
+            self.delalbumbutton = self.builder.get_object('clearbutton3')
+            self.delalbumartistbutton = self.builder.get_object('clearbutton4')
+            self.delgenrebutton = self.builder.get_object('clearbutton5')
+            self.deltrackbutton = self.builder.get_object('clearbutton6')
+            self.deldiscbutton = self.builder.get_object('clearbutton7')
+            self.delyearbutton = self.builder.get_object('clearbutton8')
+            self.delcommentbutton = self.builder.get_object('clearbutton9')
+            # fill delete button images
+            self.delimage1 = self.builder.get_object('delimage1')
+            self.delimage2 = self.builder.get_object('delimage2')
+            self.delimage3 = self.builder.get_object('delimage3')
+            self.delimage4 = self.builder.get_object('delimage4')
+            self.delimage5 = self.builder.get_object('delimage5')
+            self.delimage6 = self.builder.get_object('delimage6')
+            self.delimage7 = self.builder.get_object('delimage7')
+            self.delimage8 = self.builder.get_object('delimage8')
+            self.delimage9 = self.builder.get_object('delimage9')
             # load config window items
             self.confwindow = self.builder.get_object("config_window")
             self.libraryentry = self.builder.get_object('libraryentry')
@@ -489,6 +508,25 @@ class MYTAG(object):
         self.homebutton.connect("clicked", self.gohome)
         self.gobutton.connect("clicked", self.savetags)
         self.organisebutton.connect("clicked", self.organisefolder)
+        self.deltitlebutton.connect("clicked", self.clearentries)
+        self.delartistbutton.connect("clicked", self.clearentries)
+        self.delalbumbutton.connect("clicked", self.clearentries)
+        self.delalbumartistbutton.connect("clicked", self.clearentries)
+        self.delgenrebutton.connect("clicked", self.clearentries)
+        self.deltrackbutton.connect("clicked", self.clearentries)
+        self.deldiscbutton.connect("clicked", self.clearentries)
+        self.delyearbutton.connect("clicked", self.clearentries)
+        self.delcommentbutton.connect("clicked", self.clearentries)
+        # fill delete button images
+        self.deltitlebutton.set_image(self.delimage1)
+        self.delartistbutton.set_image(self.delimage2)
+        self.delalbumbutton.set_image(self.delimage3)
+        self.delalbumartistbutton.set_image(self.delimage4)
+        self.delgenrebutton.set_image(self.delimage5)
+        self.deltrackbutton.set_image(self.delimage6)
+        self.deldiscbutton.set_image(self.delimage7)
+        self.delyearbutton.set_image(self.delimage8)
+        self.delcommentbutton.set_image(self.delimage9)
         # config window actions
         self.applybutton.connect("clicked", self.saveconf)
         self.closebutton.connect("clicked", self.closeconf)
@@ -624,6 +662,44 @@ class MYTAG(object):
         """ hide the organise completed window """
         self.successwindow.hide()
         return
+
+    def clearentries(self, actor):
+        if actor == self.deltitlebutton:
+            if self.titlebutton.get_active():
+                self.titlebutton.set_active(False)
+                self.titleentry.set_text('')
+        if actor == self.delartistbutton:
+            if self.artistbutton.get_active():
+                self.artistbutton.set_active(False)
+                self.artistentry.set_text('')
+        if actor == self.delalbumbutton:
+            if self.albumbutton.get_active():
+                self.albumbutton.set_active(False)
+                self.albumentry.set_text('')
+        if actor == self.delalbumartistbutton:
+            if self.albumartistbutton.get_active():
+                self.albumartistbutton.set_active(False)
+                self.albumartistentry.set_text('')
+        if actor == self.delgenrebutton:
+            if self.genrebutton.get_active():
+                self.genrebutton.set_active(False)
+                self.genreentry.set_text('')
+        if actor == self.deltrackbutton:
+            if self.trackbutton.get_active():
+                self.trackbutton.set_active(False)
+                self.trackentry.set_text('')
+        if actor == self.deldiscbutton:
+            if self.discbutton.get_active():
+                self.discbutton.set_active(False)
+                self.discentry.set_text('')
+        if actor == self.delyearbutton:
+            if self.yearbutton.get_active():
+                self.yearbutton.set_active(False)
+                self.yearentry.set_text('')
+        if actor == self.delcommentbutton:
+            if self.commentbutton.get_active():
+                self.commentbutton.set_active(False)
+                self.commententry.set_text('')
 
     def loadselection(self, *args):
         """ load selected files into tag editor """
