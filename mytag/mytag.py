@@ -1026,6 +1026,7 @@ class MYTAG(object):
         discfinder = None
         discchanged = False
         trackfinder = None
+        trackchanged = False
         multipletracks = True
         multipledisc = False
         test_disc = None
@@ -1049,7 +1050,8 @@ class MYTAG(object):
             else:
                 discfinder = 'None'
         # for whole lists only find disk and search track for each file
-        else:
+        elif len(filenames) > 1:
+            trackfinder = '[Multiple]'
             for i in filenames:
                 one = i[0]
                 two = i[1]
@@ -1086,6 +1088,21 @@ class MYTAG(object):
             except:
                 # Tag error
                 item = None
+            # for single files attempt to guess disk and track if missing
+            one = musicfiles[0]
+            two = musicfiles[1]
+            three = musicfiles[2]
+            four = musicfiles[3]
+            # possible no disc eg. "01.", "03-"
+            if one == '0' and two in numericlist and three in punctuationlist:
+                if len(filenames) == 1:
+                    discfinder = '1'
+                trackfinder = one + two
+            # files with disc number "101-", etc
+            elif one in numericlist and (two in numericlist or two == '0') and three in numericlist  and four in punctuationlist:
+                if len(filenames) == 1:
+                    discfinder = one
+                trackfinder = two + three
             # pull tag info per item
             if item:
                 tmp_title = item.getTitle()
@@ -1112,7 +1129,9 @@ class MYTAG(object):
                         tmp_genre = tmp_genre.split(')')[1]
                 tmp_track = str(item.getTrackNum()[0])
                 if tmp_track == 'None':
-                    if trackfinder:
+                    if trackfinder != 'None':
+                        print 'No Track Tag'
+                        trackchanged = True
                         tmp_track = trackfinder
                     else:
                         tmp_track = None
@@ -1171,6 +1190,8 @@ class MYTAG(object):
                 self.uibuttons[count][0].set_active(True)
                 if types[0]:
                     self.uibuttons[count][1].set_text(types[0])
+                    if count == 5 and trackchanged:
+                        self.uibuttons[count][0].set_active(False)
                     if count == 6 and discchanged:
                         self.uibuttons[count][0].set_active(False)
                 else:
