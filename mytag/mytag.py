@@ -153,9 +153,13 @@ class WorkerThread(threading.Thread):
                                 self.returntext = 'permissions'
                                 self.stop = True
                                 return
-                        os.rmdir(path)
+                        try:
+                            os.rmdir(path)
+                        except OSError:
+                            pass
                     else:
                         # search subfolder for media
+                        print path
                         self.foldersearch(path)
                 elif os.path.isfile(path) and (path[(path.rfind('.')):] in
                                                 MEDIA_TYPES):
@@ -402,6 +406,7 @@ class MYTAG(object):
             # load main window items
             self.window = self.builder.get_object("main_window")
             self.settingsbutton = self.builder.get_object("settingsbutton")
+            self.editallbutton = self.builder.get_object("editallbutton")
             self.editbutton = self.builder.get_object("editbutton")
             self.backbutton = self.builder.get_object("backbutton")
             self.homebutton = self.builder.get_object("homebutton")
@@ -503,6 +508,7 @@ class MYTAG(object):
         self.yearentry.connect("key-press-event", self.entrycatch)
         self.commententry.connect("key-press-event", self.entrycatch)
         self.settingsbutton.connect("clicked", self.showconfig)
+        self.editallbutton.connect("clicked", self.loadcurrentfolder)
         self.editbutton.connect("clicked", self.loadselection)
         self.backbutton.connect("clicked", self.goback)
         self.homebutton.connect("clicked", self.gohome)
@@ -708,6 +714,18 @@ class MYTAG(object):
         for files in fileiter:
             tmp_file = self.current_dir + '/' + model[files][0]
             self.current_files.append(tmp_file)
+        self.tagimage.set_from_file(ICON_DIR + '16x16/emotes/face-plain.png')
+        self.loadtags(self.current_files)
+        return
+
+    def loadcurrentfolder(self, *args):
+        """ load current all files in current folder into list """
+        self.current_files = []
+        for files in os.listdir(self.current_dir):
+            tmp_file = self.current_dir + '/' + files
+            tmp_ext = files[(files.rfind('.')):] in MEDIA_TYPES
+            if os.path.isfile(tmp_file) and tmp_ext:
+                self.current_files.append(tmp_file)
         self.tagimage.set_from_file(ICON_DIR + '16x16/emotes/face-plain.png')
         self.loadtags(self.current_files)
         return
