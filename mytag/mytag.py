@@ -877,6 +877,10 @@ class MYTAG(object):
         """ update the loaded files with new tags """
         count = 0
         tmp_changes = []
+        # reset tag image for each save
+        self.tagimage.set_from_file(ICON_DIR + '16x16/emotes/face-plain.png')
+        while Gtk.events_pending():
+            Gtk.main_iteration()
         # check for changes
         if self.current_files == tmp_changes:
             return False
