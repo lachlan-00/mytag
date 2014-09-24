@@ -50,13 +50,42 @@ except ImportError:
 if sys.version[0] == 3:
     raise Exception('not python3 compatible, please use python 2.x')
 
+# Get OS type
+OS = os.name
 
+# non-ascii characters to replace to fat/ntfs/windows support
+URL_ASCII = ('%', "#", ';', '"', '<', '>', '?', '[', '\\', "]", '^', '`', '{',
+            '|', '}', '€', '‚', 'ƒ', '„', '…', '†', '‡', 'ˆ', '‰', 'Š', '‹',
+            'Œ', 'Ž', '‘', '’', '“', '”', '•', '–', '—', '˜', '™', 'š', '›',
+            'œ', 'ž', 'Ÿ', '¡', '¢', '£', '¥', '|', '§', '¨', '©', 'ª', '«',
+            '¬', '¯', '®', '¯', '°', '±', '²', '³', '´', 'µ', '¶', '·', '¸',
+            '¹', 'º', '»', '¼', '½', '¾', '¿', 'À', 'Á', 'Â', 'Ã', 'Ä', 'Å',
+            'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò',
+            'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'Þ', 'ß', 'à',
+            'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í',
+            'î', 'ï', 'ð', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', '÷', 'ø', 'ù', 'ú',
+            'û', 'ü', 'ý', 'þ', 'ÿ', '¦', ':', '*')
+
+# Acceptable media files
 MEDIA_TYPES = ['.m4a', '.flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
+
+# Possible date splitters to get the year
 YR_SPLIT = ['-', '/', '\\']
+
+# list of tags the program will replace with the correct tag value
 MUSIC_TAGS = ['%artist%', '%albumartist%', '%album%', '%year%',
                  '%title%', '%disc%', '%track%', '%genre%', '%comment%']
-CONFIG = xdg_config_dirs[0] + '/mytag.conf'
-ICON_DIR = '/usr/share/icons/gnome/'
+
+if OS == 'nt':
+    SLASH = '\\'
+    UI_FILE = "./main.ui"
+    CONFIG = './mytag.conf'
+    ICON_DIR = './gnome/'
+elif OS == 'posix':
+    SLASH = '/'
+    UI_FILE = "/usr/share/mytag/main.ui"
+    CONFIG = xdg_config_dirs[0] + '/mytag.conf'
+    ICON_DIR = '/usr/share/icons/gnome/'
 
 
 class WorkerThread(threading.Thread):
@@ -161,7 +190,7 @@ class WorkerThread(threading.Thread):
                         # search subfolder for media
                         print path
                         self.foldersearch(path)
-                elif os.path.isfile(path) and (path[(path.rfind('.')):] in
+                elif os.path.isfile(path) and (path[(path.rfind('.')):].lower() in
                                                 MEDIA_TYPES):
                     # organise media file
                     self.organisefiles(path)
@@ -184,6 +213,10 @@ class WorkerThread(threading.Thread):
                     self.returntext = [tags, os.path.dirname(files)]
                     self.stop = True
                 return False
+        # remove bad characters for windows paths.
+        if OS == 'nt':
+            currentdestin = self.remove_utf8(currentdestin)
+        # Move files if the processed destination is different.
         if not files == currentdestin:
             while Gtk.events_pending():
                 Gtk.main_iteration()
@@ -231,7 +264,7 @@ class WorkerThread(threading.Thread):
             for files in tmp_dir:
                 if not os.path.isdir(sourcedir + '/' + files) and not (
                                         destindir == sourcedir):
-                    filelist = files[(files.rfind('.')):]
+                    filelist = files[(files.rfind('.')):].lower()
                     if filelist in MEDIA_TYPES:
                         found_media = True
             if self.movemedia:
@@ -239,7 +272,7 @@ class WorkerThread(threading.Thread):
                 for files in tmp_dir:
                     while Gtk.events_pending():
                         Gtk.main_iteration()
-                    filelist = files[(files.rfind('.')):]
+                    filelist = files[(files.rfind('.')):].lower()
                     if not found_media and not os.path.isdir(sourcedir +
                                                                '/' + files):
                         if not filelist in MEDIA_TYPES:
@@ -254,6 +287,19 @@ class WorkerThread(threading.Thread):
                 os.rmdir(tmp_dir)
                 tmp_dir = os.path.dirname(tmp_dir)
         return
+
+    def remove_utf8(self, *args):
+        """ Function to help with FAT32 devices """
+        string = args[0]
+        count = 0
+        # replace disallowed characters with '_'
+        while count < len(URL_ASCII):
+            try:
+                string = string.replace(URL_ASCII[count], '_')
+            except UnicodeDecodeError:
+                pass
+            count = count + 1
+        return string
 
     def fill_string(self, files, destin):
         """ function to replace the variables with the tags for each file """
@@ -365,7 +411,7 @@ class MYTAG(object):
     def __init__(self):
         """ start mytag """
         self.builder = Gtk.Builder()
-        self.builder.add_from_file("/usr/share/mytag/main.ui")
+        self.builder.add_from_file(UI_FILE)
         self.builder.connect_signals(self)
         if not TAG_SUPPORT:
             Notify.init('mytag')
@@ -637,6 +683,8 @@ class MYTAG(object):
 
     def checkconfig(self):
         """ create a default config if not available """
+        if not os.path.isdir(os.path.dirname(CONFIG)):
+            os.makedirs(os.path.dirname(CONFIG))
         if not os.path.isfile(CONFIG):
             conffile = open(CONFIG, "w")
             conffile.write("[conf]\nhome = " + os.getenv('HOME') +
@@ -723,7 +771,7 @@ class MYTAG(object):
         self.current_files = []
         for files in os.listdir(self.current_dir):
             tmp_file = self.current_dir + '/' + files
-            tmp_ext = files[(files.rfind('.')):] in MEDIA_TYPES
+            tmp_ext = files[(files.rfind('.')):].lower() in MEDIA_TYPES
             if os.path.isfile(tmp_file) and tmp_ext:
                 self.current_files.append(tmp_file)
         self.tagimage.set_from_file(ICON_DIR + '16x16/emotes/face-plain.png')
@@ -1268,7 +1316,7 @@ class MYTAG(object):
         # search the supplied directory for items
         for items in files_dir:
             test_file = os.path.isfile(self.current_dir + '/' + items)
-            test_ext = items[(items.rfind('.')):] in MEDIA_TYPES
+            test_ext = items[(items.rfind('.')):].lower() in MEDIA_TYPES
             if not items[0] == '.' and test_file and test_ext:
                 self.contentlist.append([items])
         if len(self.contentlist) == 0:
