@@ -1,7 +1,7 @@
 ---------------------------------------------
 mytag: Python music tagger and file organiser
 ---------------------------------------------
-v1.2 - 14122012
+v1.9 - 24092014
 
 Why do this?
 ------------
@@ -17,17 +17,20 @@ I have written a lot of music and file organisation programs for myself and the 
 Features other taggers don't have
 ---------------------------------
  * Fast and simple file tagging process
- * set tags and organise files according to their tag in a fast and easy way.
+ * Set tags and organise files according to their tag in a fast and easy way.
 
 
 Recent Updates
 --------------
- * Added ctrl + s/l/b/h shortcuts
- * Automatically tick checkboxes when typing in tag fields
- * Added backspace to folder navigation (go back one folder)
- * Corrected threading for GTK3 programs
- * UI and code structure updates
-
+ * Added delete buttons next to tag boxes to allow quick clearing
+ * Found some bugs related to identifying media files.
+ * Added drag-selection of media files
+ * Added load folder button so skip having to select files
+ * Support Disc numbers up to 99
+ * Use GNOME gobject notifications instead of popup windows
+ * Code that attempts to premtively guess disc and track numbers
+ * Rearranged the UI slightly to make it less clutterd/compacted
+ * [WINDOWS SUPPORT TO BE ADDED] Now that GTK3 has a decent port my apps should work in windows.
 
 Supported output variables
 --------------------------
