@@ -105,9 +105,15 @@ class WorkerThread(threading.Thread):
         self.backupdir = None
         self.stoponerrors = None
         self.movemedia = None
-        self.stop = None
+        self.stopprocess = None
         self.start()
         return None
+
+    def stop(self):
+        self._stop.set()
+
+    def stopped(self):
+        return self._stop.isSet()
 
     def run(self, *args):
         """ run file organisation in a background thread """
@@ -144,7 +150,7 @@ class WorkerThread(threading.Thread):
 
     def foldersearch(self, folder):
         """ Start searching the source folder looking for music  """
-        self.stop = False
+        self.stopprocess = False
         try:
             tmpsort = os.listdir(folder)
             tmpsort.sort(key=lambda y: y.lower())
@@ -152,14 +158,14 @@ class WorkerThread(threading.Thread):
             self.returntext = folder
             return False
         except TypeError:
-            print folder
+            print(folder)
             self.returntext = folder
             return False
         # search for files and folders in the current dir
         for items in tmpsort:
             while Gtk.events_pending():
                 Gtk.main_iteration()
-            if not self.stop:
+            if not self.stopprocess:
                 try:
                     path = os.path.normpath((folder).decode('utf-8') + u'/' +
                                             (items).decode('utf-8'))
@@ -180,7 +186,7 @@ class WorkerThread(threading.Thread):
                                 os.remove(os.path.join(path + u'/' + items))
                             except OSError:
                                 self.returntext = 'permissions'
-                                self.stop = True
+                                self.stopprocess = True
                                 return
                         try:
                             os.rmdir(path)
@@ -188,7 +194,7 @@ class WorkerThread(threading.Thread):
                             pass
                     else:
                         # search subfolder for media
-                        print path
+                        print(path)
                         self.foldersearch(path)
                 elif os.path.isfile(path) and (path[(path.rfind('.')):].lower() in
                                                 MEDIA_TYPES):
@@ -211,7 +217,7 @@ class WorkerThread(threading.Thread):
                 stringtest = True
                 if self.stoponerrors:
                     self.returntext = [tags, os.path.dirname(files)]
-                    self.stop = True
+                    self.stopprocess = True
                 return False
         # remove bad characters for windows paths.
         if OS == 'nt':
@@ -245,7 +251,7 @@ class WorkerThread(threading.Thread):
                     shutil.move(files, currentdestin)
                 except OSError:
                     self.returntext = 'permissions'
-                    self.stop = True
+                    self.stopprocess = True
                     return
                 self.folder_cleanup(files, currentdestin)
         return
@@ -425,7 +431,10 @@ class MYTAG(object):
             #self.popwindow.set_markup('MYTAG ERROR: Please install' +
             #                            ' python-eyed3')
             #self.popwindow.show()
-            Gtk.main()
+            Gtk.main_quit(self)
+            raise Exception('Please install python-eyed3')
+            #Gtk.main()
+            return False
         else:
             self.worker = None
             if not self.worker:
@@ -705,7 +714,7 @@ class MYTAG(object):
         self.popwindow.destroy()
         Gtk.main_quit(*args)
         raise Exception('Please install python-eyed3')
-        return
+        return False
 
     def closepop(self, *args):
         """ hide the error popup window """
@@ -858,7 +867,8 @@ class MYTAG(object):
 
     def quit(self, *args):
         """ stop the process thread and close the program"""
-        self.worker._Thread__stop()
+        if self.worker:
+            self.worker.stop()
         self.confwindow.destroy()
         self.window.destroy()
         Gtk.main_quit(*args)
@@ -1051,13 +1061,13 @@ class MYTAG(object):
                     self.tagimage.set_from_file(ICON_DIR +
                                                 '16x16/emotes/face-crying.png')
                     save_fail = True
-                    print 'Tag Save Error ' + files
+                    print('Tag Save Error ' + files)
                     return False
                 except:
                     self.tagimage.set_from_file(ICON_DIR +
                                                 '16x16/emotes/face-crying.png')
                     save_fail = True
-                    print 'Tag Save Error ' + files
+                    print('Tag Save Error ' + files)
                     return False
         # reload new tags after saving files
         self.loadtags(self.current_files)
@@ -1182,7 +1192,7 @@ class MYTAG(object):
                 tmp_track = str(item.getTrackNum()[0])
                 if tmp_track == 'None':
                     if trackfinder != 'None':
-                        print 'No Track Tag'
+                        print('No Track Tag')
                         trackchanged = True
                         tmp_track = trackfinder
                     else:
@@ -1196,7 +1206,7 @@ class MYTAG(object):
                         tmp_track = tmp_track[:2]
                 tmp_disc = str(item.getDiscNum()[0])
                 if discfinder and tmp_disc == 'None':
-                    print 'No Disc Tag'
+                    print('No Disc Tag')
                     discchanged = True
                     tmp_disc = discfinder
                 if tmp_disc == 'None':
@@ -1327,3 +1337,4 @@ class MYTAG(object):
 if __name__ == "__main__":
     GLib.threads_init()
     MYTAG()
+
