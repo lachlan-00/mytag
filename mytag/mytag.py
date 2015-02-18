@@ -25,7 +25,6 @@
 import os
 import shutil
 import threading
-import ConfigParser
 import sys
 
 from gi.repository import Gtk
@@ -34,6 +33,12 @@ from gi.repository import GLib
 from gi.repository import Notify
 
 from xdg.BaseDirectory import xdg_config_dirs
+
+#ConfigParser Renamed for python3
+try:
+    import ConfigParser
+except ImportError:
+    import configparser as ConfigParser
 
 # python-eyeD3 required for editing and loading tags
 try:
@@ -47,7 +52,7 @@ except ImportError:
         TAG_SUPPORT = False
 
 # quit if using python3
-if sys.version[0] == 3:
+if sys.version[0] == '3':
     raise Exception('not python3 compatible, please use python 2.x')
 
 # Get OS type
@@ -158,7 +163,10 @@ class WorkerThread(threading.Thread):
             self.returntext = folder
             return False
         except TypeError:
-            print(folder)
+            try:
+                print(folder)
+            except UnicodeEncodeError:
+                pass
             self.returntext = folder
             return False
         # search for files and folders in the current dir
@@ -194,7 +202,10 @@ class WorkerThread(threading.Thread):
                             pass
                     else:
                         # search subfolder for media
-                        print(path)
+                        try:
+                            print(path)
+                        except UnicodeEncodeError:
+                            pass
                         self.foldersearch(path)
                 elif os.path.isfile(path) and (path[(path.rfind('.')):].lower() in
                                                 MEDIA_TYPES):
