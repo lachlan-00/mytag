@@ -34,25 +34,29 @@ from gi.repository import Notify
 
 from xdg.BaseDirectory import xdg_config_dirs
 
-#ConfigParser Renamed for python3
+#ConfigParser renamed for python3
 try:
     import ConfigParser
 except ImportError:
     import configparser as ConfigParser
 
-# python-eyeD3 required for editing and loading tags
-try:
-    import eyed3 as eyeD3
-    TAG_SUPPORT = True
-except ImportError:
+#Python 2 Tag support
+if sys.version[0] == '2':
+    # python-eyeD3 required for editing and loading tags
     try:
-        import eyeD3 
+        import eyed3 as eyeD3
         TAG_SUPPORT = True
     except ImportError:
-        TAG_SUPPORT = False
+        try:
+            import eyeD3
+            TAG_SUPPORT = True
+        except ImportError:
+            TAG_SUPPORT = False
 
 # quit if using python3
 if sys.version[0] == '3':
+    # look at using mutagen to support python3 instead of eyed3
+    #import mutagen
     raise Exception('not python3 compatible, please use python 2.x')
 
 # Get OS type
@@ -86,11 +90,13 @@ if OS == 'nt':
     UI_FILE = "./main.ui"
     CONFIG = './mytag.conf'
     ICON_DIR = './gnome/'
+    USERHOME = os.getenv('userprofile')
 elif OS == 'posix':
     SLASH = '/'
     UI_FILE = "/usr/share/mytag/main.ui"
     CONFIG = xdg_config_dirs[0] + '/mytag.conf'
     ICON_DIR = '/usr/share/icons/gnome/'
+    USERHOME = os.getenv('HOME')
 
 
 class WorkerThread(threading.Thread):
@@ -622,7 +628,7 @@ class MYTAG(object):
                 os.makedirs(self.homefolder)
             except OSError:
                 # unable to create homefolder
-                self.homefolder = os.getenv('HOME')
+                self.homefolder = USERHOME
         self.listfolder(self.homefolder)
         return
 
