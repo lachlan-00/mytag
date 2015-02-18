@@ -72,6 +72,7 @@ Requires
 --------
  * python 2.7
  * python-eyed3
+ * python-xdg
  * gnome-icon-theme
 
 

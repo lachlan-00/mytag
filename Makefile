@@ -4,7 +4,7 @@ UNINSTALLTEXT="mytag has been removed"
 
 install-req:
 	@mkdir -p $(INSTALLPATH)
-	@cp mytag/* $(INSTALLPATH) -f
+	@cp -r mytag/* $(INSTALLPATH) -f
 	@cp README $(INSTALLPATH) -f
 	@cp AUTHORS $(INSTALLPATH) -f
 	@cp LICENSE $(INSTALLPATH) -f
