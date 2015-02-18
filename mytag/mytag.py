@@ -607,7 +607,11 @@ class MYTAG(object):
         self.tagimage.set_from_file(ICON_DIR + '16x16/emotes/face-plain.png')
         # list default dir on startup
         if not os.path.isdir(self.homefolder):
-            os.makedirs(self.homefolder)
+            try:
+                os.makedirs(self.homefolder)
+            except OSError:
+                # unable to create homefolder
+                self.homefolder = os.getenv('HOME')
         self.listfolder(self.homefolder)
         return
 
