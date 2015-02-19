@@ -27,6 +27,8 @@ import shutil
 import threading
 import sys
 
+import remove_utf8
+
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GLib
@@ -62,19 +64,6 @@ if sys.version[0] == '3':
 # Get OS type
 OS = os.name
 
-# non-ascii characters to replace to fat/ntfs/windows support
-URL_ASCII = ('%', "#", ';', '"', '<', '>', '?', '[', '\\', "]", '^', '`', '{',
-            '|', '}', '€', '‚', 'ƒ', '„', '…', '†', '‡', 'ˆ', '‰', 'Š', '‹',
-            'Œ', 'Ž', '‘', '’', '“', '”', '•', '–', '—', '˜', '™', 'š', '›',
-            'œ', 'ž', 'Ÿ', '¡', '¢', '£', '¥', '|', '§', '¨', '©', 'ª', '«',
-            '¬', '¯', '®', '¯', '°', '±', '²', '³', '´', 'µ', '¶', '·', '¸',
-            '¹', 'º', '»', '¼', '½', '¾', '¿', 'À', 'Á', 'Â', 'Ã', 'Ä', 'Å',
-            'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò',
-            'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'Þ', 'ß', 'à',
-            'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í',
-            'î', 'ï', 'ð', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', '÷', 'ø', 'ù', 'ú',
-            'û', 'ü', 'ý', 'þ', 'ÿ', '¦', ':', '*')
-
 # Acceptable media files
 MEDIA_TYPES = ['.m4a', '.flac', '.ogg', '.mp2', '.mp3', '.wav', '.spx']
 
@@ -83,7 +72,7 @@ YR_SPLIT = ['-', '/', '\\']
 
 # list of tags the program will replace with the correct tag value
 MUSIC_TAGS = ['%artist%', '%albumartist%', '%album%', '%year%',
-                 '%title%', '%disc%', '%track%', '%genre%', '%comment%']
+              '%title%', '%disc%', '%track%', '%genre%', '%comment%']
 
 if OS == 'nt':
     SLASH = '\\'
@@ -97,7 +86,6 @@ elif OS == 'posix':
     CONFIG = xdg_config_dirs[0] + '/mytag.conf'
     ICON_DIR = '/usr/share/icons/gnome/'
     USERHOME = os.getenv('HOME')
-
 
 class WorkerThread(threading.Thread):
     """ run a separate thread to the ui """
@@ -121,9 +109,11 @@ class WorkerThread(threading.Thread):
         return None
 
     def stop(self):
+        """ stop the thread """
         self._stop.set()
 
     def stopped(self):
+        """ Set Stop """
         return self._stop.isSet()
 
     def run(self, *args):
@@ -185,6 +175,7 @@ class WorkerThread(threading.Thread):
                                             (items).decode('utf-8'))
                 except UnicodeEncodeError:
                     path = os.path.normpath(folder + '/' + items)
+                pathext = path[(path.rfind('.')):].lower()
                 if os.path.isdir(path) and os.listdir(path) == []:
                     tmp_dir = path
                     # remove empty folders and search backwards for more
@@ -192,7 +183,7 @@ class WorkerThread(threading.Thread):
                         os.rmdir(tmp_dir)
                         tmp_dir = os.path.split(tmp_dir)[0]
                 if os.path.isdir(path) and (self.backupdir !=
-                                                os.path.dirname(path)):
+                                            os.path.dirname(path)):
                     # remove '.mediaartlocal' folders
                     if os.path.basename(path) == '.mediaartlocal':
                         for items in os.listdir(path):
@@ -213,8 +204,7 @@ class WorkerThread(threading.Thread):
                         except UnicodeEncodeError:
                             pass
                         self.foldersearch(path)
-                elif os.path.isfile(path) and (path[(path.rfind('.')):].lower() in
-                                                MEDIA_TYPES):
+                elif os.path.isfile(path) and pathext in MEDIA_TYPES:
                     # organise media file
                     self.organisefiles(path)
         return
@@ -223,7 +213,8 @@ class WorkerThread(threading.Thread):
         """ sort media when found """
         # set output path and fill variables with the tag value
         stringtest = False
-        currentdestin = os.path.normpath(self.destin + u'/' + self.destinformat)
+        currentdestin = os.path.normpath(self.destin + u'/' +
+                                         self.destinformat)
         currentdestin = self.fill_string(files, currentdestin)
         # ignore missing tags
         if not currentdestin:
@@ -238,7 +229,7 @@ class WorkerThread(threading.Thread):
                 return False
         # remove bad characters for windows paths.
         if OS == 'nt':
-            currentdestin = self.remove_utf8(currentdestin)
+            currentdestin = remove_utf8.remove_utf8(currentdestin)
         # Move files if the processed destination is different.
         if not files == currentdestin:
             while Gtk.events_pending():
@@ -246,16 +237,16 @@ class WorkerThread(threading.Thread):
             # create a backup when conflicts are found
             if os.path.isfile(currentdestin):
                 backupdestin = os.path.normpath(self.backupdir + '/' +
-                                    self.destinformat)
+                                                self.destinformat)
                 backup = self.fill_string(files, backupdestin)
                 if os.path.isfile(backup) and not files == backup:
                     count = 0
                     tmp_path = backup
+                    tmpext = tmp_path.rfind('.')
                     while os.path.isfile(backup):
                         backup = tmp_path
-                        backup = (tmp_path[:(tmp_path.rfind('.'))] +
-                                    str(count) + tmp_path[(
-                                    tmp_path.rfind('.')):])
+                        backup = (tmp_path[:(tmpext)] +
+                                  str(count) + tmp_path[(tmpext):])
                         count = count + 1
                 # update destination to the non-conflicting destination
                 currentdestin = backup
@@ -285,8 +276,8 @@ class WorkerThread(threading.Thread):
             found_media = False
             # check for left over media files
             for files in tmp_dir:
-                if not os.path.isdir(sourcedir + '/' + files) and not (
-                                        destindir == sourcedir):
+                if not os.path.isdir((sourcedir + '/' + files) and not
+                                     (destindir == sourcedir)):
                     filelist = files[(files.rfind('.')):].lower()
                     if filelist in MEDIA_TYPES:
                         found_media = True
@@ -297,7 +288,7 @@ class WorkerThread(threading.Thread):
                         Gtk.main_iteration()
                     filelist = files[(files.rfind('.')):].lower()
                     if not found_media and not os.path.isdir(sourcedir +
-                                                               '/' + files):
+                                                             '/' + files):
                         if not filelist in MEDIA_TYPES:
                             mvdest = destindir + '/' + files
                             mvsrc = sourcedir + '/' + files
@@ -310,19 +301,6 @@ class WorkerThread(threading.Thread):
                 os.rmdir(tmp_dir)
                 tmp_dir = os.path.dirname(tmp_dir)
         return
-
-    def remove_utf8(self, *args):
-        """ Function to help with FAT32 devices """
-        string = args[0]
-        count = 0
-        # replace disallowed characters with '_'
-        while count < len(URL_ASCII):
-            try:
-                string = string.replace(URL_ASCII[count], '_')
-            except UnicodeDecodeError:
-                pass
-            count = count + 1
-        return string
 
     def fill_string(self, files, destin):
         """ function to replace the variables with the tags for each file """
@@ -451,7 +429,6 @@ class MYTAG(object):
             Gtk.main_quit(self)
             raise Exception('Please install python-eyed3')
             #Gtk.main()
-            return False
         else:
             self.worker = None
             if not self.worker:
@@ -493,7 +470,7 @@ class MYTAG(object):
             self.artistbutton = self.builder.get_object('artistbutton')
             self.albumbutton = self.builder.get_object('albumbutton')
             self.albumartistbutton = self.builder.get_object('albumart' +
-                                                                'istbutton')
+                                                             'istbutton')
             self.genrebutton = self.builder.get_object('genrebutton')
             self.trackbutton = self.builder.get_object('trackbutton')
             self.discbutton = self.builder.get_object('discbutton')
@@ -503,7 +480,7 @@ class MYTAG(object):
             self.artistentry = self.builder.get_object('artistentry')
             self.albumentry = self.builder.get_object('albumentry')
             self.albumartistentry = self.builder.get_object('albumart' +
-                                                                'istentry')
+                                                            'istentry')
             self.genreentry = self.builder.get_object('genreentry')
             self.trackentry = self.builder.get_object('trackentry')
             self.discentry = self.builder.get_object('discentry')
@@ -707,7 +684,8 @@ class MYTAG(object):
         Notify.init('mytag')
         title = 'mytag'
         note = 'CONFIG: Changes Saved'
-        notification = Notify.Notification.new(title, note, ICON_DIR + '24x24/actions/gtk-save.png')
+        notification = Notify.Notification.new(title, note, ICON_DIR +
+                                               '24x24/actions/gtk-save.png')
         Notify.Notification.show(notification)
         return
 
@@ -718,10 +696,10 @@ class MYTAG(object):
         if not os.path.isfile(CONFIG):
             conffile = open(CONFIG, "w")
             conffile.write("[conf]\nhome = " + os.getenv('HOME') +
-                       "\ndefaultlibrary = " + os.getenv('HOME') +
-                       "\noutputstyle = %albumartist%/(%year%) " +
-                       "%album%/%disc%%track% - %title%\n" +
-                       "stoponerror = True\nmovenonmedia = True\n")
+                           "\ndefaultlibrary = " + os.getenv('HOME') +
+                           "\noutputstyle = %albumartist%/(%year%) " +
+                           "%album%/%disc%%track% - %title%\n" +
+                           "stoponerror = True\nmovenonmedia = True\n")
             conffile.close()
         return
 
@@ -735,7 +713,6 @@ class MYTAG(object):
         self.popwindow.destroy()
         Gtk.main_quit(*args)
         raise Exception('Please install python-eyed3')
-        return False
 
     def closepop(self, *args):
         """ hide the error popup window """
@@ -748,6 +725,7 @@ class MYTAG(object):
         return
 
     def clearentries(self, actor):
+        """ Clear the list of tags before reopening files """
         if actor == self.deltitlebutton:
             if self.titlebutton.get_active():
                 self.titlebutton.set_active(False)
@@ -837,7 +815,7 @@ class MYTAG(object):
     def shortcatch(self, actor, event):
         """ capture keys for shortcuts """
         test_mask = (event.state & Gdk.ModifierType.CONTROL_MASK ==
-                       Gdk.ModifierType.CONTROL_MASK)
+                     Gdk.ModifierType.CONTROL_MASK)
         if event.get_state() and test_mask:
             if event.get_keycode()[1] == 39:
                 self.savetags()
@@ -852,10 +830,10 @@ class MYTAG(object):
     def entrycatch(self, actor, event):
         """ capture key presses to activate checkboxes """
         movement_keys = [22, 23, 36, 37, 50, 62, 64, 65, 66,
-                            105, 108, 110, 111, 112, 113,
-                            114, 115, 116, 117, 118, 119]
+                         105, 108, 110, 111, 112, 113,
+                         114, 115, 116, 117, 118, 119]
         test_mask = (event.state & Gdk.ModifierType.CONTROL_MASK ==
-                       Gdk.ModifierType.CONTROL_MASK)
+                     Gdk.ModifierType.CONTROL_MASK)
         # only set active when not using movement keys
         if not event.get_keycode()[1] in movement_keys and not test_mask:
             if actor == self.titleentry:
@@ -906,7 +884,8 @@ class MYTAG(object):
                 Notify.init('mytag')
                 title = 'mytag'
                 note = 'ERROR: Check Folder Permissions'
-                notification = Notify.Notification.new(title, note, ICON_DIR + '24x24/status/error.png')
+                notification = Notify.Notification.new(title, note, ICON_DIR +
+                                                       '24x24/status/error.png')
                 Notify.Notification.show(notification)
                 #self.popwindow.set_markup('Error: Unable to modify folder.' +
                 #                          ' Check Permissions')
@@ -917,7 +896,8 @@ class MYTAG(object):
                 Notify.init('mytag')
                 title = 'mytag'
                 note = 'ERROR: Opening ' + returnstring
-                notification = Notify.Notification.new(title, note, ICON_DIR + '24x24/status/error.png')
+                notification = Notify.Notification.new(title, note, ICON_DIR +
+                                                       '24x24/status/error.png')
                 Notify.Notification.show(notification)
                 #self.popwindow.set_markup('Error: Opening ' + returnstring)
                 #self.popwindow.show()
@@ -927,7 +907,8 @@ class MYTAG(object):
             Notify.init('mytag')
             title = 'mytag'
             note = 'ERROR: ' + returnstring[0] + ' missing. ' + returnstring[1]
-            notification = Notify.Notification.new(title, note, ICON_DIR + '24x24/status/error.png')
+            notification = Notify.Notification.new(title, note, ICON_DIR +
+                                                   '24x24/status/error.png')
             Notify.Notification.show(notification)
             #self.popwindow.set_markup('Error: ' + returnstring[0] +
             #                          ' missing')
@@ -939,7 +920,8 @@ class MYTAG(object):
             Notify.init('mytag')
             title = 'mytag'
             note = 'SUCCESS: Your files have been organised'
-            notification = Notify.Notification.new(title, note, ICON_DIR + '24x24/actions/filesave.png')
+            notification = Notify.Notification.new(title, note, ICON_DIR +
+                                                   '24x24/actions/filesave.png')
             Notify.Notification.show(notification)
             #self.successwindow.show()
             if not os.path.isdir(self.current_dir):
@@ -1059,7 +1041,7 @@ class MYTAG(object):
                 if tmp_album != None and tmp_album != current_album:
                     item.setAlbum(tmp_album)
                 if tmp_albumartist != None and (tmp_albumartist !=
-                        current_albumartist):
+                                                current_albumartist):
                     item.setArtist(tmp_albumartist, 'TPE2')
                 if tmp_genre != None and tmp_genre != current_genre:
                     item.setGenre(tmp_genre)
@@ -1104,13 +1086,13 @@ class MYTAG(object):
         filelist = args[0]
         # try to get disk/track by filenames
         filenames = []
-        numericlist = ['1','2','3','4','5','6','7','8','9']
-        punctuationlist = [' ','.','-','_']
+        numericlist = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+        punctlist = [' ', '.', '-', '_']
         discfinder = None
         discchanged = False
         trackfinder = None
         trackchanged = False
-        multipletracks = True
+        #multipletracks = True
         multipledisc = False
         test_disc = None
         # get the file basenames for checking
@@ -1123,11 +1105,12 @@ class MYTAG(object):
             three = filenames[0][2]
             four = filenames[0][3]
             # possible no disc eg. "01.", "03-"
-            if one == '0' and two in numericlist and three in punctuationlist:
+            if one == '0' and two in numericlist and three in punctlist:
                 discfinder = '1'
                 trackfinder = one + two
             # files with disc number "101-", etc
-            elif one in numericlist and (two in numericlist or two == '0') and three in numericlist  and four in punctuationlist:
+            elif (one in numericlist and (two in numericlist or two == '0') and
+                  three in numericlist  and four in punctlist):
                 discfinder = one
                 trackfinder = two + three
             else:
@@ -1141,10 +1124,13 @@ class MYTAG(object):
                 three = i[2]
                 four = i[3]
                 # possible no disc eg. "01.", "03-"
-                if one == '0' and two in numericlist and three in punctuationlist:
+                if one == '0' and two in numericlist and three in punctlist:
                     test_disc = '1'
                 # files with disc number "101-", etc
-                elif one in numericlist and (two in numericlist or two == '0') and three in numericlist  and four in punctuationlist:
+                elif (one in numericlist and
+                      (two in numericlist or two == '0') and
+                      three in numericlist and
+                      four in punctlist):
                     if not multipledisc:
                         test_disc = one
                         multipledisc = True
@@ -1153,7 +1139,7 @@ class MYTAG(object):
             discfinder = test_disc
         # pull tags for each music file
         for musicfiles in filelist:
-            filename = os.path.basename(musicfiles)
+            #filename = os.path.basename(musicfiles)
             tmp_title = None
             tmp_artist = None
             tmp_album = None
@@ -1177,12 +1163,13 @@ class MYTAG(object):
             three = musicfiles[2]
             four = musicfiles[3]
             # possible no disc eg. "01.", "03-"
-            if one == '0' and two in numericlist and three in punctuationlist:
+            if one == '0' and two in numericlist and three in punctlist:
                 if len(filenames) == 1:
                     discfinder = '1'
                 trackfinder = one + two
             # files with disc number "101-", etc
-            elif one in numericlist and (two in numericlist or two == '0') and three in numericlist  and four in punctuationlist:
+            elif (one in numericlist and (two in numericlist or two == '0') and
+                  three in numericlist  and four in punctlist):
                 if len(filenames) == 1:
                     discfinder = one
                 trackfinder = two + three
