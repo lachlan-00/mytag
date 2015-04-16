@@ -247,8 +247,7 @@ class WorkerThread(threading.Thread):
             found_media = False
             # check for left over media files
             for files in tmp_dir:
-                if not os.path.isdir((sourcedir + '/' + files) and not
-                                     (destindir == sourcedir)):
+                if not os.path.isdir(sourcedir + '/' + files) and not (destindir == sourcedir):
                     filelist = files[(files.rfind('.')):].lower()
                     if filelist in MEDIA_TYPES:
                         found_media = True
