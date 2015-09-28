@@ -123,6 +123,24 @@
               </packing>
             </child>
             <child>
+              <object class="GtkCheckButton" id="windowssafecheck">
+                <property name="label" translatable="yes">Remove characters unsupported by Windows</property>
+                <property name="use_action_appearance">False</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="xalign">0</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
               <placeholder/>
             </child>
             <child>
@@ -235,8 +253,8 @@
               <object class="GtkLabel" id="currentdirlabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="xalign">0.0099999997764825821</property>
                 <property name="selectable">True</property>
+                <property name="xalign">0.0099999997764825821</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -290,9 +308,9 @@
                     <property name="margin_left">10</property>
                     <property name="margin_right">3</property>
                     <property name="hexpand">True</property>
-                    <property name="xalign">0.89999997615814209</property>
                     <property name="label" translatable="yes">Load Folder:</property>
                     <property name="angle">0.01</property>
+                    <property name="xalign">0.89999997615814209</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -330,8 +348,8 @@
                     <property name="margin_left">10</property>
                     <property name="margin_right">3</property>
                     <property name="hexpand">True</property>
-                    <property name="xalign">0.89999997615814209</property>
                     <property name="label" translatable="yes">Load Selection:</property>
+                    <property name="xalign">0.89999997615814209</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -406,8 +424,8 @@
                     <property name="width_request">210</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="xalign">0.89999997615814209</property>
                     <property name="label" translatable="yes">Choose:</property>
+                    <property name="xalign">0.89999997615814209</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -938,8 +956,8 @@
                           <object class="GtkLabel" id="savedlabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="xalign">0.89999997615814209</property>
                             <property name="label" translatable="yes">Save status:</property>
+                            <property name="xalign">0.89999997615814209</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1052,8 +1070,8 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="hexpand">True</property>
-                    <property name="xalign">0.89999997615814209</property>
                     <property name="label" translatable="yes">Save:</property>
+                    <property name="xalign">0.89999997615814209</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1097,8 +1115,8 @@
                   <object class="GtkLabel" id="organiselabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="xalign">0.89999997615814209</property>
                     <property name="label" translatable="yes">Organise:</property>
+                    <property name="xalign">0.89999997615814209</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>

@@ -96,6 +96,7 @@ class WorkerThread(threading.Thread):
         self.destinformat = None
         self.stoponerrors = None
         self.movemedia = None
+        self.windowssafe = None
         if args:
             if args[0]:
                 self.source = args[0]
@@ -115,6 +116,11 @@ class WorkerThread(threading.Thread):
                     self.movemedia = True
                 else:
                     self.movemedia = False
+            if args[6] or OS == 'nt':
+                if args[6] == 'True' or OS == 'nt':
+                    self.windowssafe = True
+                else:
+                    self.windowssafe = False
             if self.destin:
                 self.backupdir = os.path.normpath(self.destin + '/BACKUP/')
             self.foldersearch(self.source)
@@ -199,7 +205,7 @@ class WorkerThread(threading.Thread):
                     self.stopprocess = True
                 return False
         # remove bad characters for windows paths.
-        if OS == 'nt':
+        if self.windowssafe:
             currentdestin = mytagstrings.remove_utf8(currentdestin)
         # Move files if the processed destination is different.
         if not files == currentdestin:

@@ -128,6 +128,10 @@ class MYTAG(object):
                 self.movenonmedia = self.conf.get('conf', 'movenonmedia')
             except ConfigParser.NoOptionError:
                 self.movenonmedia = 'True'
+            try:
+                self.windowssafe = self.conf.get('conf', 'windowssafe')
+            except ConfigParser.NoOptionError:
+                self.windowssafe = 'False'
             self.current_dir = self.homefolder
             self.current_files = None
             self.filelist = None
@@ -194,6 +198,7 @@ class MYTAG(object):
             self.homeentry = self.builder.get_object('homeentry')
             self.errorcheck = self.builder.get_object('errorcheck')
             self.mediacheck = self.builder.get_object('nonmediacheck')
+            self.windowscheck = self.builder.get_object('windowssafecheck')
             self.applybutton = self.builder.get_object("applyconf")
             self.closebutton = self.builder.get_object("closeconf")
             # load popup window items
@@ -332,6 +337,10 @@ class MYTAG(object):
             self.mediacheck.set_active(True)
         else:
             self.mediacheck.set_active(False)
+        if self.windowssafe == 'True':
+            self.windowscheck.set_active(True)
+        else:
+            self.windowscheck.set_active(False)
         self.confwindow.show()
         return
 
@@ -353,6 +362,12 @@ class MYTAG(object):
         else:
             self.conf.set('conf', 'movenonmedia', 'False')
             self.movenonmedia = 'False'
+        if self.windowscheck.get_active():
+            self.conf.set('conf', 'windowssafe', 'True')
+            self.windowssafe = 'True'
+        else:
+            self.conf.set('conf', 'windowssafe', 'False')
+            self.windowssafe = 'False'
         self.homefolder = self.homeentry.get_text()
         self.library = self.libraryentry.get_text()
         self.libraryformat = self.styleentry.get_text()
@@ -378,7 +393,8 @@ class MYTAG(object):
                            "\ndefaultlibrary = " + os.getenv('HOME') +
                            "\noutputstyle = %albumartist%/(%year%) " +
                            "%album%/%disc%%track% - %title%\n" +
-                           "stoponerror = True\nmovenonmedia = True\n")
+                           "stoponerror = True\nmovenonmedia = True\n" +
+                           "windowssafe = False\n")
             conffile.close()
         return
 
@@ -556,7 +572,8 @@ class MYTAG(object):
         """ send organise to the workerthread for processing """
         returnstring = self.worker.run(self.current_dir, self.filelist,
                                        self.library, self.libraryformat,
-                                       self.stoponerror, self.movenonmedia)
+                                       self.stoponerror, self.movenonmedia,
+                                       self.windowssafe)
         # notify for different errors
         if type(returnstring) == type(''):
             if returnstring == 'permissions':
