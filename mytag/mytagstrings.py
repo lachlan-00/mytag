@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """ mytagstrings
     ----------------Authors----------------
@@ -25,23 +25,26 @@ import sys
 
 from gi.repository import Gtk
 
-#Python 2 Tag support
+# Python 2 Tag support
 if sys.version[0] == '2':
     # python-eyeD3 required for editing and loading tags
     try:
         import eyed3 as eyeD3
+
         TAG_SUPPORT = True
     except ImportError:
         try:
             import eyeD3
+
             TAG_SUPPORT = True
         except ImportError:
+            eyeD3 = None
             TAG_SUPPORT = False
 
 # quit if using python3
 if sys.version[0] == '3':
     # look at using mutagen to support python3 instead of eyed3
-    #import mutagen
+    # import mutagen
     raise Exception('not python3 compatible, please use python 2.x')
 
 # non-ascii characters to replace to fat/ntfs/windows support
@@ -57,6 +60,7 @@ URL_ASCII = ('%', "#", ';', '"', '<', '>', '?', '[', '\\', "]", '^', '`', '{',
              'î', 'ï', 'ð', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', '÷', 'ø', 'ù', 'ú',
              'û', 'ü', 'ý', 'þ', 'ÿ', '¦', ':', '*')
 
+
 def remove_utf8(string):
     """ Function to help with FAT32 devices """
     count = 0
@@ -66,8 +70,9 @@ def remove_utf8(string):
             string = string.replace(URL_ASCII[count], '_')
         except UnicodeDecodeError:
             pass
-        count = count + 1
+        count += 1
     return string
+
 
 def fill_string(files, destin):
     """ function to replace the variables with the tags for each file """
@@ -172,4 +177,3 @@ def fill_string(files, destin):
             Gtk.main_iteration()
         return destin
     return
-        

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """ mytag: Python music tagger and file organiser
     ----------------Authors----------------
@@ -34,29 +34,31 @@ from gi.repository import Notify
 
 from xdg.BaseDirectory import xdg_config_dirs
 
-#ConfigParser renamed for python3
+# ConfigParser renamed for python3
 try:
     import ConfigParser
 except ImportError:
     import configparser as ConfigParser
 
-#Python 2 Tag support
+# Python 2 Tag support
 if sys.version[0] == '2':
     # python-eyeD3 required for editing and loading tags
     try:
         import eyed3 as eyeD3
+
         TAG_SUPPORT = True
     except ImportError:
         try:
             import eyeD3
             TAG_SUPPORT = True
         except ImportError:
+            eyeD3 = None
             TAG_SUPPORT = False
 
 # quit if using python3
 if sys.version[0] == '3':
     # look at using mutagen to support python3 instead of eyed3
-    #import mutagen
+    # import mutagen
     raise Exception('not python3 compatible, please use python 2.x')
 
 # Get OS type
@@ -88,6 +90,7 @@ elif OS == 'posix':
 
 class MYTAG(object):
     """ browse folders and set tags using ui """
+
     def __init__(self):
         """ start mytag """
         self.builder = Gtk.Builder()
@@ -99,15 +102,15 @@ class MYTAG(object):
             note = 'ERROR: install python-eyed3'
             notification = Notify.Notification.new(title, note, None)
             Notify.Notification.show(notification)
-            #self.popwindow = self.builder.get_object("popup_window")
-            #closeerror = self.builder.get_object("closepop")
-            #closeerror.connect("clicked", self.closeerror)
-            #self.popwindow.set_markup('MYTAG ERROR: Please install' +
+            # self.popwindow = self.builder.get_object("popup_window")
+            # closeerror = self.builder.get_object("closepop")
+            # closeerror.connect("clicked", self.closeerror)
+            # self.popwindow.set_markup('MYTAG ERROR: Please install' +
             #                            ' python-eyed3')
-            #self.popwindow.show()
+            # self.popwindow.show()
             Gtk.main_quit(self)
             raise Exception('Please install python-eyed3')
-            #Gtk.main()
+            # Gtk.main()
         else:
             self.worker = None
             if not self.worker:
@@ -484,6 +487,7 @@ class MYTAG(object):
     def folderclick(self, *args):
         """ traverse folders on double click """
         model, treeiter = self.folderview.get_selection().get_selected()
+        new_dir = None
         if treeiter:
             new_dir = self.current_dir + '/' + model[treeiter][0]
         if os.path.isdir(new_dir):
@@ -520,7 +524,6 @@ class MYTAG(object):
                 self.goback()
             if event.get_keycode()[1] == 43:
                 self.gohome()
-
 
     def entrycatch(self, actor, event):
         """ capture key presses to activate checkboxes """
@@ -583,9 +586,9 @@ class MYTAG(object):
                 notification = Notify.Notification.new(title, note, ICON_DIR +
                                                        '24x24/status/error.png')
                 Notify.Notification.show(notification)
-                #self.popwindow.set_markup('Error: Unable to modify folder.' +
+                # self.popwindow.set_markup('Error: Unable to modify folder.' +
                 #                          ' Check Permissions')
-                #self.popwindow.show()
+                # self.popwindow.show()
                 self.listfolder(self.current_dir)
                 return False
             else:
@@ -595,8 +598,8 @@ class MYTAG(object):
                 notification = Notify.Notification.new(title, note, ICON_DIR +
                                                        '24x24/status/error.png')
                 Notify.Notification.show(notification)
-                #self.popwindow.set_markup('Error: Opening ' + returnstring)
-                #self.popwindow.show()
+                # self.popwindow.set_markup('Error: Opening ' + returnstring)
+                # self.popwindow.show()
                 self.listfolder(self.current_dir)
                 return False
         if type(returnstring) == type([]):
@@ -606,10 +609,10 @@ class MYTAG(object):
             notification = Notify.Notification.new(title, note, ICON_DIR +
                                                    '24x24/status/error.png')
             Notify.Notification.show(notification)
-            #self.popwindow.set_markup('Error: ' + returnstring[0] +
+            # self.popwindow.set_markup('Error: ' + returnstring[0] +
             #                          ' missing')
-            #self.popwindow.format_secondary_text(returnstring[1])
-            #self.popwindow.show()
+            # self.popwindow.format_secondary_text(returnstring[1])
+            # self.popwindow.show()
             self.listfolder(self.current_dir)
             return False
         else:
@@ -619,7 +622,7 @@ class MYTAG(object):
             notification = Notify.Notification.new(title, note, ICON_DIR +
                                                    '24x24/actions/filesave.png')
             Notify.Notification.show(notification)
-            #self.successwindow.show()
+            # self.successwindow.show()
             if not os.path.isdir(self.current_dir):
                 if os.path.isdir(os.path.dirname(self.current_dir)):
                     self.current_dir = os.path.dirname(self.current_dir)
@@ -645,7 +648,7 @@ class MYTAG(object):
         while count < len(self.uibuttons):
             if self.uibuttons[count][0].get_active():
                 tmp_changes.append([count, self.uibuttons[count][1].get_text()])
-            count = count + 1
+            count += 1
         save_fail = False
         # update tags for each file selected
         for files in self.current_files:
@@ -730,26 +733,26 @@ class MYTAG(object):
                     if changes[0] == 8:
                         tmp_comment = changes[1]
                 # compare and set changes if required
-                if tmp_title != None and tmp_title != current_title:
+                if tmp_title is not None and tmp_title != current_title:
                     item.setTitle(tmp_title)
-                if tmp_artist != None and tmp_artist != current_artist:
+                if tmp_artist is not None and tmp_artist != current_artist:
                     item.setArtist(tmp_artist)
-                if tmp_album != None and tmp_album != current_album:
+                if tmp_album is not None and tmp_album != current_album:
                     item.setAlbum(tmp_album)
-                if tmp_albumartist != None and (tmp_albumartist !=
-                                                current_albumartist):
+                if tmp_albumartist is not None and (tmp_albumartist !=
+                                                    current_albumartist):
                     item.setArtist(tmp_albumartist, 'TPE2')
-                if tmp_genre != None and tmp_genre != current_genre:
+                if tmp_genre is not None and tmp_genre != current_genre:
                     item.setGenre(tmp_genre)
-                if tmp_track != None and tmp_track != current_track:
+                if tmp_track is not None and tmp_track != current_track:
                     item.setTrackNum([tmp_track, None])
-                if tmp_disc != None and tmp_disc != current_disc:
+                if tmp_disc is not None and tmp_disc != current_disc:
                     item.setDiscNum([tmp_disc, None])
-                if tmp_year != None and tmp_year != current_year:
+                if tmp_year is not None and tmp_year != current_year:
                     item.setTextFrame('TDRC', tmp_year)
                     item.setTextFrame('TDRL', tmp_year)
                     item.setTextFrame('TYER', tmp_year)
-                if tmp_comment != None and tmp_comment != current_comment:
+                if tmp_comment is not None and tmp_comment != current_comment:
                     item.removeComments()
                     item.addComment(tmp_comment)
                 try:
@@ -788,7 +791,7 @@ class MYTAG(object):
         discchanged = False
         trackfinder = None
         trackchanged = False
-        #multipletracks = True
+        # multipletracks = True
         multipledisc = False
         test_disc = None
         # get the file basenames for checking
@@ -806,7 +809,7 @@ class MYTAG(object):
                 trackfinder = one + two
             # files with disc number "101-", etc
             elif (one in numericlist and (two in numericlist or two == '0') and
-                  three in numericlist  and four in punctlist):
+                  three in numericlist and four in punctlist):
                 discfinder = one
                 trackfinder = two + three
             else:
@@ -835,7 +838,7 @@ class MYTAG(object):
             discfinder = test_disc
         # pull tags for each music file
         for musicfiles in filelist:
-            #filename = os.path.basename(musicfiles)
+            # filename = os.path.basename(musicfiles)
             tmp_title = None
             tmp_artist = None
             tmp_album = None
@@ -865,7 +868,7 @@ class MYTAG(object):
                 trackfinder = one + two
             # files with disc number "101-", etc
             elif (one in numericlist and (two in numericlist or two == '0') and
-                  three in numericlist  and four in punctlist):
+                  three in numericlist and four in punctlist):
                 if len(filenames) == 1:
                     discfinder = one
                 trackfinder = two + three
@@ -939,13 +942,13 @@ class MYTAG(object):
         # compare tags
         count = 0
         for types in self.trackselection:
-            if types == []:
+            if not types:
                 return False
             comparison = False
             if len(args[0]) == 1:
                 comparison = True
             for item in types[1:]:
-                if item == None:
+                if item is None:
                     comparison = False
                     break
                 if item != types[0]:
@@ -969,7 +972,7 @@ class MYTAG(object):
                     self.uibuttons[count][1].set_text('')
                 else:
                     self.uibuttons[count][1].set_text('[Multiple]')
-            count = count + 1
+            count += 1
         return
 
     def clearopenfiles(self):
@@ -978,7 +981,7 @@ class MYTAG(object):
         while count < len(self.uibuttons):
             self.uibuttons[count][0].set_active(False)
             self.uibuttons[count][1].set_text('')
-            count = count + 1
+            count += 1
         self.tagimage.set_from_file(ICON_DIR + '16x16/emotes/face-plain.png')
         self.tagmsg.set_text('')
         return
@@ -1015,6 +1018,7 @@ class MYTAG(object):
 
     def listfiles(self, *args):
         """ function to fill the file list column """
+        files_dir = None
         self.current_files = []
         try:
             files_dir = os.listdir(self.current_dir)
@@ -1041,4 +1045,3 @@ class MYTAG(object):
 if __name__ == "__main__":
     GLib.threads_init()
     MYTAG()
-

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """ mytagworker
     ----------------Authors----------------
@@ -58,6 +58,7 @@ elif OS == 'posix':
     ICON_DIR = '/usr/share/icons/gnome/'
     USERHOME = os.getenv('HOME')
 
+
 class WorkerThread(threading.Thread):
     """ run a separate thread to the ui """
     def __init__(self, notify_window):
@@ -75,9 +76,10 @@ class WorkerThread(threading.Thread):
         self.backupdir = None
         self.stoponerrors = None
         self.movemedia = None
+        self.windowssafe = None
         self.stopprocess = None
         self.start()
-        return None
+        # return None
 
     def stop(self):
         """ stop the thread """
@@ -148,24 +150,24 @@ class WorkerThread(threading.Thread):
                 Gtk.main_iteration()
             if not self.stopprocess:
                 try:
-                    path = os.path.normpath((folder).decode('utf-8') + u'/' +
-                                            (items).decode('utf-8'))
+                    path = os.path.normpath(folder.decode('utf-8') + u'/' +
+                                            items.decode('utf-8'))
                 except UnicodeEncodeError:
                     path = os.path.normpath(folder + '/' + items)
                 pathext = path[(path.rfind('.')):].lower()
                 if os.path.isdir(path) and os.listdir(path) == []:
                     tmp_dir = path
                     # remove empty folders and search backwards for more
-                    while os.listdir(tmp_dir) == []:
+                    while not os.listdir(tmp_dir):
                         os.rmdir(tmp_dir)
                         tmp_dir = os.path.split(tmp_dir)[0]
                 if os.path.isdir(path) and (self.backupdir !=
                                             os.path.dirname(path)):
                     # remove '.mediaartlocal' folders
                     if os.path.basename(path) == '.mediaartlocal':
-                        for items in os.listdir(path):
+                        for diritems in os.listdir(path):
                             try:
-                                os.remove(os.path.join(path + u'/' + items))
+                                os.remove(os.path.join(path + u'/' + diritems))
                             except OSError:
                                 self.returntext = 'permissions'
                                 self.stopprocess = True
@@ -222,9 +224,9 @@ class WorkerThread(threading.Thread):
                     tmpext = tmp_path.rfind('.')
                     while os.path.isfile(backup):
                         backup = tmp_path
-                        backup = (tmp_path[:(tmpext)] +
-                                  str(count) + tmp_path[(tmpext):])
-                        count = count + 1
+                        backup = (tmp_path[:tmpext] +
+                                  str(count) + tmp_path[tmpext:])
+                        count += 1
                 # update destination to the non-conflicting destination
                 currentdestin = backup
             if not os.path.isfile(currentdestin) and not stringtest:
@@ -265,15 +267,15 @@ class WorkerThread(threading.Thread):
                     filelist = files[(files.rfind('.')):].lower()
                     if not found_media and not os.path.isdir(sourcedir +
                                                              '/' + files):
-                        if not filelist in MEDIA_TYPES:
+                        if filelist not in MEDIA_TYPES:
                             mvdest = destindir + '/' + files
                             mvsrc = sourcedir + '/' + files
                             # move non-media files when no more music found.
                             shutil.move(mvsrc, mvdest)
         # Remove empty folders, if you have moved out the last file.
-        if os.listdir(sourcedir) == []:
+        if not os.listdir(sourcedir):
             tmp_dir = sourcedir
-            while os.listdir(tmp_dir) == []:
+            while not os.listdir(tmp_dir):
                 os.rmdir(tmp_dir)
                 tmp_dir = os.path.dirname(tmp_dir)
         return

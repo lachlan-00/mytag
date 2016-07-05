@@ -28,8 +28,8 @@ Recent Updates
  * Added load folder button so skip having to select files
  * Support Disc numbers up to 99
  * Use GNOME gobject notifications instead of popup windows
- * Code that attempts to premtively guess disc and track numbers
- * Rearranged the UI slightly to make it less clutterd/compacted
+ * Code that attempts to preemptively guess disc and track numbers
+ * Rearranged the UI slightly to make it less cluttered/compacted
  * [WINDOWS SUPPORT TO BE ADDED] Now that GTK3 has a decent port my apps should work in windows.
 
 Supported output variables

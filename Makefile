@@ -11,6 +11,8 @@ install-req:
 	@cp bin/mytag /usr/bin/ -f
 	@cp share/mytag.png /usr/share/pixmaps -f
 	@cp share/mytag.desktop /usr/share/applications/ -f
+	@chmod +x /usr/bin/mytag
+	@chmod +x /usr/share/mytag/mytag.py
 
 install: install-req
 	@echo $(INSTALLTEXT)
